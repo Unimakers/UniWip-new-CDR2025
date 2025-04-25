@@ -26,6 +26,6 @@ namespace physique
     ECRT_ROUE= 26,
     DIAM_ROUE=75,
     STEP_REV=200,
-    STEP_CM=(3.1415926535)
+    STEP_CM=(3.1415926535);
 } // namespace physique
 
