@@ -31,6 +31,7 @@ namespace Physique
     ECRT_ROUE= 26,
     DIAM_ROUE=75,
     STEP_REV=200,
-    STEP_CM=(STEP_REV/(2*Math::PI*(DIAM_ROUE/2)));
+    STEP_CM=(STEP_REV/(2*Math::PI*(DIAM_ROUE/2))),
+    ACCELARATION=10;
 } // namespace physique
 
