@@ -18,14 +18,19 @@ namespace Pin
     } // namespace IHM 
     
 } // namespace Pin
+namespace Math
+{
+    constexpr double
+    PI=3.1415926535;
+} // namespace math
 
-namespace physique
+namespace Physique
 {
     constexpr double 
     LARGEUR=35.6,
     ECRT_ROUE= 26,
     DIAM_ROUE=75,
     STEP_REV=200,
-    STEP_CM=(3.1415926535)
+    STEP_CM=(STEP_REV/(2*Math::PI*(DIAM_ROUE/2)));
 } // namespace physique
 
