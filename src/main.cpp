@@ -1,18 +1,48 @@
 #include <Arduino.h>
+#include <Robotmove.h>
+#include <PCF8574.h>
 
-// put function declarations here:
-int myFunction(int, int);
+RobotMove robot;
+enum struct etat
+{
+  PRE_INIT,
+  INITALISATION,
+  MATCH,
+  FIN
+};
+etat etat_a = etat::PRE_INIT;
+//PCF8574 pcf();
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+void setup()
+{
+  pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
+  // fonction de pre_init
+  while (digitalRead(Pin::IHM::TIRETTE))
+  {
+    Serial.println("Mais t'es pas là mais t'es où?");
+  }
+  etat_a = etat::INITALISATION;
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
+void loop()
+{
+  if (etat_a != etat::MATCH)
+  {
+    if (etat_a == etat::FIN)
+    {
+      return;
+    }
+    if (not(digitalRead(Pin::IHM::TIRETTE)))
+    {
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+      Serial.println("Jchuis là");
+    }
+    else
+    {
+      etat_a = etat::MATCH;
+      Serial.println("fin setup");
+    }
+
+    return;
+  }
 }
