@@ -13,7 +13,10 @@ namespace Pin
     namespace IHM
     {
         constexpr int
-            TIRETTE = 11;
+            TIRETTE = 11,
+            LIDAR_PWM=999,
+            LIDAR_RX=999,
+            LIDAR_TX=999;
 
     } // namespace IHM
 
@@ -21,7 +24,7 @@ namespace Pin
 namespace Math
 {
     constexpr double
-        PI = 3.1415926535;
+        PI14 = 3.1415926535;
 } // namespace math
 
 namespace Physique
@@ -31,6 +34,6 @@ namespace Physique
         ECRT_ROUE = 26,
         DIAM_ROUE = 75,
         STEP_REV = 200,
-        STEP_CM = (STEP_REV / (2 * Math::PI * (DIAM_ROUE / 2))),
+        STEP_CM = (STEP_REV / (2 * Math::PI14 * (DIAM_ROUE / 2))),
         ACCELARATION = 10;
 } // namespace physique

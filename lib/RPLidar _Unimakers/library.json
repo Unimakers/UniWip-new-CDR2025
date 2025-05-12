@@ -1,0 +1,31 @@
+{
+    "name": "RPLidar (Unimakers Fork)",
+    "version": "1.0.3",
+    "description": "Local fork of RPLidar driver",
+    "keywords": "lidar, rplidar",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/DanCrank/rplidar_arduino"
+    },
+    "authors":
+    [
+      {
+        "name": "Robopeak",
+        "email": "support@robopeak.com",
+        "url": "https://www.robopeak.com"
+      },
+      {
+        "name": "Dan Crank",
+        "email": "danno@danno.org"
+      },
+      {
+        "name": "Unimakers",
+        "email": "Unimakers.amiens@gmail.com",
+        "url": "https://www.Unimakers.fr"
+      }
+    ],
+    "license": "MIT",
+    "frameworks": "*",
+    "platforms": "*"
+  }
