@@ -3,16 +3,6 @@
 class RobotMove
 {
 protected:
-    typedef struct Coord
-    {
-        double
-            x,
-            y,
-            a;
-    };
-    Coord
-        coordInst,
-        destination;
 
     enum struct Etat_mvt
     {
@@ -29,6 +19,17 @@ protected:
         stepper_droit;
 
 public:
+    typedef struct Coord
+    {
+        double
+            x,
+            y,
+            a;
+    };
+    Coord
+        coordInst,
+        destination;
+
     RobotMove(Coord startCoord);
     void run();
     bool reachedtarget();

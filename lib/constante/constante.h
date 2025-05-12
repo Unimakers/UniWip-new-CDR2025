@@ -3,11 +3,11 @@ namespace Pin
     namespace Driver
     {
         constexpr int
-            DIR_G = 1,
-            STEP_G = 2,
-            DIR_D = 3,
-            STEP_D = 4,
-            EN = 9;
+            DIR_G = 13,
+            STEP_G = 14,
+            DIR_D = 11,
+            STEP_D = 12,
+            EN = 46;
     } // namespace Driver
 
     namespace IHM
