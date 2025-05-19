@@ -19,7 +19,7 @@ bool lidarHasObstaclePiped = false;
 
 bool lidarHasObstacle = false;
 void sendObstacleData(bool);
-bool obstacle();
+bool obstacle(float);
 void reset_point();
 bool lidarInitialized = false;
 long cooldownstarted = 0;
@@ -39,15 +39,28 @@ bool angleInRange()
 {
     return (mesure.angle >= 270 && mesure.angle <= 360) || (mesure.angle >= 120 && mesure.angle <= 180) || (mesure.angle >= 0 && mesure.angle <= 45);
 }
+bool prevcdstate = false;
 // FONOCTION COEUR 0 (COEUR LIDAR)
 void checkAndSendObstacle(bool a){
     if(a){
         cooldownstarted=millis();
         cooldowning=true;
+        prevcdstate=true;
+        infoPrintln("hellolidarfuck");
         sendObstacleData(true);
         return;
     }
-    if(cooldowning && abs((long)(millis()-cooldownstarted))<10000) return;
+
+    if(cooldowning && abs((long)(millis()-cooldownstarted))<15000){
+        // debugPrint("waiting at ");
+        debugPrintln(millis());
+        sendObstacleData(true);
+        return;
+    }
+    if(prevcdstate==true){
+        prevcdstate=false;
+        infoPrintln("disabling");
+    }
     cooldowning=false;
     sendObstacleData(false);
 }
@@ -56,22 +69,26 @@ void get_point_lidar()
 {
     if (IS_OK(lidar.waitPoint()))
     {
+        bool supobstacleval = false;
         mesure.angle = lidar.getCurrentPoint().angle;
+        // debugPrintln(((std::string)("a"+std::to_string(mesure.angle))).c_str());
         if (angleInRange())
         {
             mesure.distance = lidar.getCurrentPoint().distance; // distance value in mm unit
             mesure.quality = lidar.getCurrentPoint().quality;
+            // debugPrintln(((std::string)("q"+std::to_string(mesure.quality))).c_str());
             if (mesure.quality > QUALITY)
             {
-                if (obstacle())
+                // debugPrintln(((std::string)("d"+std::to_string(mesure.distance))).c_str());
+                if (obstacle(mesure.distance))
                 {
                     double xPoint = cos(mesure.angle) * mesure.distance;
                     double yPoint = sin(mesure.angle) * mesure.distance;
-                    Serial.println(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
-                    checkAndSendObstacle(true);
+                    debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
+                    supobstacleval=true;
                 }
                 else{
-                    checkAndSendObstacle(false);
+                    supobstacleval=false;
                 }
             }
             else
@@ -79,17 +96,18 @@ void get_point_lidar()
                 reset_point();
             }
         }
-        delay(250);
+        checkAndSendObstacle(supobstacleval);
+        // delay(250);
     }
     else
     {
-        // analogWrite(PIN::LIDAR::PWM, 0); // stop the rplidar motor
-        // Serial.println("Lidar Stopped");
+        // analogWrite(Pin::IHM::LIDAR_PWM, 0); // stop the rplidar motor
+        // debugPrintln("Lidar Stopped");
         // try to detect RPLIDAR...
         rplidar_response_device_info_t info;
         if (IS_OK(lidar.getDeviceInfo(info, 100)))
         {
-            Serial.println("Lidar found");
+            debugPrintln("Lidar found");
             // detected...
             lidar.startScan();
             analogWrite(Pin::IHM::LIDAR_PWM, 150);
@@ -97,7 +115,7 @@ void get_point_lidar()
         }
         else
         {
-            Serial.println("Lidar not found");
+            debugPrintln("Lidar not found");
         }
     }
     delay(25);
@@ -112,13 +130,13 @@ void LidarTask(void *pvParameters)
     //     // lidarInitialized = true;
     //     // taskEXIT_CRITICAL(&my_spinlock);
     // }
-    lidar.begin(lidarSerial, Pin::IHM::LIDAR_RX, Pin::IHM::LIDAR_TX);
+    lidar.begin(lidarSerial, 17, 18);
     lidar.startScan();
     for (;;)
     {
-        // Serial.println("hello");
+        // debugPrintln("hello");
         get_point_lidar();
-        delay(250);
+        // delay(250);
     }
 }
 
@@ -147,6 +165,10 @@ bool getLidarStatus()
     taskENTER_CRITICAL(&my_spinlock);
     lidarHasObstacle = lidarHasObstaclePiped;
     taskEXIT_CRITICAL(&my_spinlock);
+    if(lidarHasObstacle){
+        // debugPrint("lidar is here");
+        // debugPrintln(millis());
+    }
     return lidarHasObstacle;
 }
 // FONCTION COEUR 0 (COUEUR LIDAR)
@@ -155,9 +177,9 @@ bool Angle_in_range_scare()
     return (mesure.angle >= 300 && mesure.angle <= 360) and (mesure.distance < DIST_OBSTACLE / sin(mesure.angle));
 }
 // FONCTION COEUR 0 (COUEUR LIDAR)
-bool obstacle()
+bool obstacle(float distance)
 {
-    if (mesure.distance < DIST_OBSTACLE && mesure.distance > 10)
+    if (distance < DIST_OBSTACLE && distance > 1)
     {
         return true;
     }

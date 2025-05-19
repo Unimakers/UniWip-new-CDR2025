@@ -1,3 +1,8 @@
+#pragma once
+#define debugPrint Serial.print
+#define debugPrintln Serial.println
+#define infoPrintln Serial.println
+#define infoPrint Serial.print
 namespace Pin
 {
     namespace Driver
