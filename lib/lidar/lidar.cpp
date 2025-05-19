@@ -1,3 +1,5 @@
+//AUTO UPDATE FROM unishape-cdr2025-robot/lib/Lidar/lidar.cpp
+//REPLACE = PIN::LIDAR::PWM => Pin::IHM::LIDAR_PWM
 #include <Arduino.h>
 #include <constante.h>
 #include <RPLidar.h>
