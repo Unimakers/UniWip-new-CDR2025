@@ -65,9 +65,9 @@ void get_point_lidar()
             {
                 if (obstacle())
                 {
-                    // double xPoint = cos(mesure.angle) * mesure.distance;
-                    // double yPoint = sin(mesure.angle) * mesure.distance;
-                    // Serial.println(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
+                    double xPoint = cos(mesure.angle) * mesure.distance;
+                    double yPoint = sin(mesure.angle) * mesure.distance;
+                    Serial.println(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
                     checkAndSendObstacle(true);
                 }
                 else{

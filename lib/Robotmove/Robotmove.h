@@ -19,7 +19,7 @@ protected:
         stepper_droit;
 
 public:
-    typedef struct Coord
+    struct Coord
     {
         double
             x,
@@ -30,7 +30,7 @@ public:
         coordInst,
         destination;
 
-    RobotMove(Coord startCoord);
+    RobotMove();
     void run();
     bool reachedtarget();
     void moveTo(Coord coord, int vitesse);
@@ -40,4 +40,5 @@ public:
 
     void turnTo(double angle, int vitesse);
     void turn(double angle, int vitesse);
+    void setCoord(Coord startCoord);
 };

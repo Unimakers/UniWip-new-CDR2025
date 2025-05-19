@@ -32,7 +32,7 @@ enum struct atype
   MOVETO
 };
 
-typedef struct etape
+struct etape
 {
   atype action;
   int distance;

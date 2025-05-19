@@ -1,13 +1,15 @@
 #include <Robotmove.h>
 
-RobotMove::RobotMove(RobotMove::Coord startcoord)
+RobotMove::RobotMove()
 {
-    this->coordInst = startcoord;
     this->stepper_droit = AccelStepper(AccelStepper::DRIVER, Pin::Driver::STEP_D, Pin::Driver::DIR_D);
     this->stepper_gauche = AccelStepper(AccelStepper::DRIVER, Pin::Driver::STEP_G, Pin::Driver::DIR_G);
     this->stepper_droit.setPinsInverted(1);
 }
-
+void RobotMove::setCoord(RobotMove::Coord startcoord)
+{
+    this->coordInst = startcoord;
+}
 void RobotMove::run()
 {
     stepper_droit.run();
@@ -29,25 +31,23 @@ bool RobotMove::reachedtarget()
 
 bool RobotMove::moveToLoop()
 {
-    switch (etat_ec)
+    if (etat_ec == Etat_mvt::TURN_S)
     {
-    case Etat_mvt::TURN_S:
         etat_ec = Etat_mvt::FORWARD;
         float d = sqrt(pow((destination.x - coordInst.x), 2) + pow((destination.y - coordInst.y), 2));
         forward(d, vitesse_mT);
         return false;
-        break;
-
-    case Etat_mvt::FORWARD:
+    }
+    else if (etat_ec == Etat_mvt::FORWARD)
+    {
         etat_ec = Etat_mvt::TURN_F;
         turnTo(destination.a, vitesse_mT);
         return false;
-        break;
-
-    default:
+    }
+    else
+    {
         etat_ec = Etat_mvt::STILL;
         return true;
-        break;
     }
 }
 
