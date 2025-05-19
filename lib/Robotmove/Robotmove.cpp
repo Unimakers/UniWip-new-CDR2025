@@ -54,12 +54,12 @@ bool RobotMove::moveToLoop()
 void RobotMove::forward(int distance, int vitesse)
 {
     int nbr_step = distance * Physique::STEP_CM;
-    stepper_droit.setAcceleration(Physique::ACCELARATION);
-    stepper_droit.setSpeed(vitesse * Physique::STEP_CM);
+    stepper_droit.setAcceleration(vitesse/2);
+    stepper_droit.setMaxSpeed(vitesse);
     stepper_droit.move(distance * Physique::STEP_CM);
 
-    stepper_gauche.setAcceleration(Physique::ACCELARATION);
-    stepper_gauche.setSpeed(vitesse * Physique::STEP_CM);
+    stepper_gauche.setAcceleration(vitesse/2);
+    stepper_gauche.setMaxSpeed(vitesse);
     stepper_gauche.move(distance * Physique::STEP_CM);
 
     coordInst.x += distance * sin(coordInst.a);
@@ -106,4 +106,9 @@ void RobotMove::moveTo(Coord coord, int vitesse)
     etat_ec = Etat_mvt::TURN_S;
     destination = coord;
     vitesse_mT = vitesse;
+}
+void RobotMove::debugPosition(){
+    Serial.print(stepper_gauche.currentPosition());
+    Serial.print(";;");
+    Serial.println(stepper_droit.currentPosition());
 }

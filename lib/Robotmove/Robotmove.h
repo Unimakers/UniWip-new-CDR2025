@@ -41,4 +41,5 @@ public:
     void turnTo(double angle, int vitesse);
     void turn(double angle, int vitesse);
     void setCoord(Coord startCoord);
+    void debugPosition();
 };

@@ -13,7 +13,7 @@ namespace Pin
     namespace IHM
     {
         constexpr int
-            TIRETTE = 11,
+            TIRETTE = 8,
             LIDAR_PWM=999,
             LIDAR_RX=999,
             LIDAR_TX=999;
