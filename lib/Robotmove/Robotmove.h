@@ -11,7 +11,7 @@ protected:
         TURN_F,
         STILL
     };
-    Etat_mvt etat_ec;
+    Etat_mvt etat_ec=Etat_mvt::STILL;
 
     int vitesse_mT;
     AccelStepper

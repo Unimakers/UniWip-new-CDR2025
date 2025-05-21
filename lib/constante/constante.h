@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 #define debugPrint Serial.print
 #define debugPrintln Serial.println
 #define infoPrintln Serial.println
@@ -8,20 +9,20 @@ namespace Pin
     namespace Driver
     {
         constexpr int
-            DIR_G = 13,
-            STEP_G = 14,
-            DIR_D = 11,
-            STEP_D = 12,
-            EN = 46;
+            DIR_G = D0,//13,
+            STEP_G = D1,
+            DIR_D = D2,
+            STEP_D = D3,
+            EN = D8;
     } // namespace Driver
 
     namespace IHM
     {
         constexpr int
-            TIRETTE = 8,
-            LIDAR_PWM=999,
-            LIDAR_RX=999,
-            LIDAR_TX=999;
+            TIRETTE = D10,
+            LIDAR_PWM=D9,
+            LIDAR_RX=RX,
+            LIDAR_TX=TX;
 
     } // namespace IHM
 
@@ -38,7 +39,8 @@ namespace Physique
         LARGEUR = 35.6,
         ECRT_ROUE = 26,
         DIAM_ROUE = 75,
-        STEP_REV = 200,
+        STEP_MULTI= 16,
+        STEP_REV = 200*STEP_MULTI,
         STEP_CM = (STEP_REV / (2 * Math::PI14 * (DIAM_ROUE / 2))),
         ACCELARATION = 10;
 } // namespace physique

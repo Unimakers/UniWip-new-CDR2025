@@ -61,6 +61,8 @@ void RobotMove::forward(int distance, int vitesse)
     stepper_gauche.setAcceleration(vitesse/2);
     stepper_gauche.setMaxSpeed(vitesse);
     stepper_gauche.move(distance * Physique::STEP_CM);
+    Serial.print("set max speed");
+    Serial.println(vitesse);
 
     coordInst.x += distance * sin(coordInst.a);
     coordInst.y += distance * cos(coordInst.a);
@@ -74,10 +76,10 @@ void RobotMove::backward(int distance, int vitesse)
 void RobotMove::turn(double angle, int vitesse)
 {
     stepper_droit.setAcceleration(Physique::ACCELARATION);
-    stepper_droit.setSpeed(vitesse * Physique::STEP_CM);
+    stepper_droit.setMaxSpeed(vitesse * Physique::STEP_CM);
 
     stepper_gauche.setAcceleration(Physique::ACCELARATION);
-    stepper_gauche.setSpeed(vitesse * Physique::STEP_CM);
+    stepper_gauche.setMaxSpeed(vitesse * Physique::STEP_CM);
 
     int nbr_step = (Physique::ECRT_ROUE / 2) * (angle * PI / 180);
 
