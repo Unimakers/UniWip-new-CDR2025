@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define HELLOWORLD 3
+#define HELLOWORLD 4
 #if HELLOWORLD == 0
 #include <AccelStepper.h>
 AccelStepper left, right;
@@ -168,6 +168,22 @@ int angleToPulse(int angle)
 {
     int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
     return pulse;
+}
+#elif HELLOWORLD==4
+#include <Wire.h>
+#include <PCF8574.h>
+PCF8574 pcf(0x20);
+void setup(){
+    pcf.pinMode(P0,OUTPUT);
+    Serial.begin(115200);
+    pcf.pinMode(P1,INPUT);
+    pcf.begin();
+}
+void loop(){
+    uint8_t a = pcf.digitalRead(P1);
+    Serial.println(a);
+    pcf.digitalWrite(P0,a);
+    delay(1000);
 }
 #else
 #include <Robotmove.h>
