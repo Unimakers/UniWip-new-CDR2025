@@ -231,22 +231,58 @@ struct etape
 
 typedef std::vector<etape> strategie;
 
-// etape{.action=atype::FORWARD,.distance=,.vitesse=},
-// etape{.action=atype::TURN,.angle=,.vitesse=},
-// etape{.action=atype::MOVETO,.coordonnees=,.vitesse=},
 
+typedef atype A;
+constexpr int DEFAULT_SPEED=1000;
+/// @brief Créer une étape pour faire avancer le robot
+/// @param d la distance en cm
+/// @param v la vitesse en step/s (par défault à 1000)
+/// @return l'étape nouvellement créée
+etape FORWARD(int d,int v=DEFAULT_SPEED){
+    return etape{.action=A::FORWARD,.distance=d,.vitesse=v};
+}
+/// @brief Créer une étape pour faire reculer le robot
+/// @param d la distance en cm 
+/// @param v la vitesse en step/s (par défault à 1000)
+/// @return l'étape nouvellement créée
+etape BACKWARD(int d,int v=DEFAULT_SPEED){
+    return etape{.action=A::BACKWARD,.distance=d,.vitesse=v};
+}
+/// @brief Créer une étape pour faire tourner le robot
+/// @param a l'angle en degré
+/// @param v la vitesse en step/s (par défault à 1000)
+/// @return l'étape nouvellement créée
+etape TURN(double a,int v=DEFAULT_SPEED){
+    return etape{.action=A::TURN, .angle=a,.vitesse=v};
+}
+/// @brief Créer une étape pour faire tourner le robot vers un angle précis
+/// @param a l'angle de destination en degré
+/// @param v la vitesse en step/s (par défault à 1000)
+/// @return l'étape nouvellement créée
+etape TURNTO(double a,int v=DEFAULT_SPEED){
+    return etape{.action=A::TURNTO, .angle=a,.vitesse=v};
+}
+/// @brief Créer une étape pour faire déplacer le robot vers un point précis
+/// @param c la coordonnée avec x et y en cm et a en degrés
+/// @param v la vitesse en step/s (par défault à 1000)
+/// @return l'étape nouvellement créée
+etape MOVETO(RobotMove::Coord c,int v=DEFAULT_SPEED){
+    return etape{.action=A::MOVETO, .coordonnees=c,.vitesse=v};
+}
+
+/// @brief La stratégie numéro un du robot
 strategie stratun = strategie{
-    etape{.action = atype::FORWARD, .distance = 1000000, .vitesse = 1000},
-    // etape{.action = atype::TURN, .angle = 60, .vitesse = 1000},
-    // etape{.action = atype::FORWARD, .distance = 100, .vitesse = 1000},
-    // etape{.action = atype::TURN, .angle = 60, .vitesse = 1000},
-    // etape{.action = atype::FORWARD, .distance = 100, .vitesse = 1000},
-    // etape{.action = atype::TURN, .angle = 60, .vitesse = 1000}
+    FORWARD(100000),
+    BACKWARD(1000),
+    MOVETO({1000,1000})
 };
 
+/// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
 strategie strat = stratun;
 
 int etapeencour = -1;
+/// @brief Appeler la fonction correspondant à une étape
+/// @param step l'étape actuelle
 void actioncall(etape step)
 {
     switch (step.action)
@@ -283,11 +319,14 @@ void actioncall(etape step)
     }
 }
 
+/// @brief vérifier si une étape est finie
+/// @return vrai si l'étape est finie, sinon faux
 bool actionfini()
 {
     return robot.reachedtarget();
 }
 
+/// @brief fonction d'initialisation
 void setup()
 {
     Serial.begin(115200);
@@ -309,6 +348,7 @@ void setup()
     delay(1000);
 }
 bool showed_step = false;
+/// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
     if (etat_a != etat::MATCH)
@@ -374,3 +414,4 @@ void loop()
 }
 
 #endif
+
