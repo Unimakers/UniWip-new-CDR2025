@@ -1,4 +1,5 @@
 #include <Robotmove.h>
+#include <lidar.cpp>
 
 RobotMove::RobotMove()
 {
@@ -53,6 +54,7 @@ bool RobotMove::moveToLoop()
 
 void RobotMove::forward(int distance, int vitesse)
 {
+    sendCurrentAngle({0,Math::signum(distance)});
     int nbr_step = distance * Physique::STEP_CM;
     stepper_droit.setAcceleration(vitesse/2);
     stepper_droit.setMaxSpeed(vitesse);
@@ -75,6 +77,7 @@ void RobotMove::backward(int distance, int vitesse)
 
 void RobotMove::turn(double angle, int vitesse)
 {
+    sendCurrentAngle({Math::signum(angle)*0.5,0.5});
     stepper_droit.setAcceleration(Physique::ACCELARATION);
     stepper_droit.setMaxSpeed(vitesse * Physique::STEP_CM);
 

@@ -1,11 +1,11 @@
-//AUTO UPDATE FROM unishape-cdr2025-robot/lib/Lidar/lidar.cpp
-//REPLACE = PIN::LIDAR::PWM => Pin::IHM::LIDAR_PWM
+//UniLidar by Aurélien
 #include <Arduino.h>
 #include <constante.h>
 #include <RPLidar.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <string>
+#include <vector>
 RPLidar lidar;
 HardwareSerial lidarSerial(1);
 // HardwareSerial lidarSerial(1);
@@ -37,10 +37,22 @@ typedef struct
 
 LIDAR_MESURE_RES mesure;
 // FONCTION COEUR 0 (COUEUR LIDAR)
-bool angleInRange()
-{
-    return (mesure.angle >= 270 && mesure.angle <= 360) || (mesure.angle >= 120 && mesure.angle <= 180) || (mesure.angle >= 0 && mesure.angle <= 45);
+struct DirectionVector{
+    double x,y;
+};
+double calculateAngleFromDirection(DirectionVector v){
+    atan2(v.y,v.x);
 }
+
+double currentDirectionAngle=0;
+
+double angleInAngleRange(double angle_to_check){
+    return (angle_to_check>=currentDirectionAngle-80 and angle_to_check<=currentDirectionAngle+80);
+}
+// bool angleInRange()
+// {
+//     return (mesure.angle >= 270 && mesure.angle <= 360) || (mesure.angle >= 120 && mesure.angle <= 180) || (mesure.angle >= 0 && mesure.angle <= 45);
+// }
 bool prevcdstate = false;
 // FONOCTION COEUR 0 (COEUR LIDAR)
 void checkAndSendObstacle(bool a){
@@ -66,6 +78,9 @@ void checkAndSendObstacle(bool a){
     cooldowning=false;
     sendObstacleData(false);
 }
+
+
+
 // FONCTION COEUR 0 (COUEUR LIDAR)
 void get_point_lidar()
 {
@@ -74,7 +89,7 @@ void get_point_lidar()
         bool supobstacleval = false;
         mesure.angle = lidar.getCurrentPoint().angle;
         // debugPrintln(((std::string)("a"+std::to_string(mesure.angle))).c_str());
-        if (angleInRange())
+        if (angleInAngleRange(mesure.angle))
         {
             mesure.distance = lidar.getCurrentPoint().distance; // distance value in mm unit
             mesure.quality = lidar.getCurrentPoint().quality;
@@ -172,6 +187,12 @@ bool getLidarStatus()
         // debugPrintln(millis());
     }
     return lidarHasObstacle;
+}
+void sendCurrentAngle(DirectionVector v){
+    double angle = calculateAngleFromDirection(v);
+    taskENTER_CRITICAL(&my_spinlock);
+    currentDirectionAngle = angle;
+    taskEXIT_CRITICAL(&my_spinlock);
 }
 // FONCTION COEUR 0 (COUEUR LIDAR)
 bool Angle_in_range_scare()

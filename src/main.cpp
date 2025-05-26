@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define HELLOWORLD 4
+#define HELLOWORLD 99
 #if HELLOWORLD == 0
 #include <AccelStepper.h>
 AccelStepper left, right;
@@ -186,6 +186,7 @@ void loop(){
     delay(1000);
 }
 #else
+#include <lidar.cpp>
 #include <Robotmove.h>
 #include <PCF8574.h>
 #include <vector>
@@ -251,14 +252,23 @@ void actioncall(etape step)
     switch (step.action)
     {
     case atype::FORWARD:
+        
         return robot.forward(step.distance, step.vitesse);
         break;
 
     case atype::BACKWARD:
+        sendCurrentAngle({0,-1});
         return robot.backward(step.distance, step.vitesse);
         break;
 
     case atype::TURN:
+        if(step.angle>0){
+            sendCurrentAngle({0.5,0.5});
+        }else if(step.angle<0){
+            sendCurrentAngle({-0.5,0.5});
+        }else{
+            sendCurrentAngle({0,1});
+        }
         return robot.turn(step.angle, step.vitesse);
 
     case atype::TURNTO:

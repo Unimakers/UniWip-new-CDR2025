@@ -31,6 +31,12 @@ namespace Math
 {
     constexpr double
         PI14 = 3.1415926535;
+    constexpr int signint(int x){
+        return (x > 0) - (x < 0);
+    }
+    constexpr double signum(double x){
+        return (x > 0) - (x < 0);
+    }
 } // namespace math
 
 namespace Physique
