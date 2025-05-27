@@ -44,7 +44,7 @@ namespace Physique
     constexpr double
         LARGEUR = 35.6,
         ECRT_ROUE = 26,
-        DIAM_ROUE = 75,
+        DIAM_ROUE = 7.5,
         STEP_MULTI= 16,
         STEP_REV = 200*STEP_MULTI,
         STEP_CM = (STEP_REV / (2 * Math::PI14 * (DIAM_ROUE / 2))),

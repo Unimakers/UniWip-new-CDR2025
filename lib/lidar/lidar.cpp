@@ -1,11 +1,5 @@
 //UniLidar by Aurélien
-#include <Arduino.h>
-#include <constante.h>
-#include <RPLidar.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <string>
-#include <vector>
+#include <lidar.h>
 RPLidar lidar;
 HardwareSerial lidarSerial(1);
 // HardwareSerial lidarSerial(1);
@@ -20,9 +14,7 @@ static portMUX_TYPE my_spinlock = portMUX_INITIALIZER_UNLOCKED;
 bool lidarHasObstaclePiped = false;
 
 bool lidarHasObstacle = false;
-void sendObstacleData(bool);
-bool obstacle(float);
-void reset_point();
+
 bool lidarInitialized = false;
 long cooldownstarted = 0;
 bool cooldowning = false;
@@ -37,17 +29,18 @@ typedef struct
 
 LIDAR_MESURE_RES mesure;
 // FONCTION COEUR 0 (COUEUR LIDAR)
-struct DirectionVector{
-    double x,y;
-};
-double calculateAngleFromDirection(DirectionVector v){
-    atan2(v.y,v.x);
+double clampAngle(double angle){
+    return fmod((360+angle),360);
 }
+double calculateAngleFromDirection(DirectionVector v){
+    return clampAngle((atan2(v.y,v.x)*RAD_TO_DEG)-90.0);
+}
+
 
 double currentDirectionAngle=0;
 
 double angleInAngleRange(double angle_to_check){
-    return (angle_to_check>=currentDirectionAngle-80 and angle_to_check<=currentDirectionAngle+80);
+    return (angle_to_check)>=clampAngle(currentDirectionAngle-80) and (angle_to_check)<=clampAngle(currentDirectionAngle+80);
 }
 // bool angleInRange()
 // {
@@ -67,7 +60,7 @@ void checkAndSendObstacle(bool a){
 
     if(cooldowning && abs((long)(millis()-cooldownstarted))<15000){
         // debugPrint("waiting at ");
-        debugPrintln(millis());
+        // debugPrintln(millis());
         sendObstacleData(true);
         return;
     }
@@ -99,9 +92,10 @@ void get_point_lidar()
                 // debugPrintln(((std::string)("d"+std::to_string(mesure.distance))).c_str());
                 if (obstacle(mesure.distance))
                 {
-                    double xPoint = cos(mesure.angle) * mesure.distance;
-                    double yPoint = sin(mesure.angle) * mesure.distance;
-                    debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
+                    // double xPoint = cos(mesure.angle) * mesure.distance;
+                    // double yPoint = sin(mesure.angle) * mesure.distance;
+                    // debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
+                    debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
                     supobstacleval=true;
                 }
                 else{
@@ -147,7 +141,7 @@ void LidarTask(void *pvParameters)
     //     // lidarInitialized = true;
     //     // taskEXIT_CRITICAL(&my_spinlock);
     // }
-    lidar.begin(lidarSerial, 17, 18);
+    lidar.begin(lidarSerial,RX, TX);
     lidar.startScan();
     for (;;)
     {

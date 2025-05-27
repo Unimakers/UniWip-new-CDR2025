@@ -1,0 +1,190 @@
+#if HELLOWORLD == 0
+#include <AccelStepper.h>
+AccelStepper left, right;
+void setup()
+{
+    pinMode(D8, OUTPUT);
+    pinMode(D10, INPUT_PULLUP);
+    Serial.begin(115200);
+    delay(3000);
+    Serial.println("helloworld how are you??");
+    while (!digitalRead(D10))
+    {
+        Serial.println("what the fuck?");
+        delay(100);
+    }
+    // fonction de pre_init
+    while (digitalRead(D10))
+    {
+        Serial.println("Mais t'es pas là mais t'es où?");
+        delay(100);
+    }
+    while (!digitalRead(D10))
+    {
+        Serial.println("ok t la");
+        delay(100);
+    }
+    right = AccelStepper(AccelStepper::DRIVER, D3, D2);
+    left = AccelStepper(AccelStepper::DRIVER, D1, D0);
+    left.setAcceleration(500);
+    left.setMaxSpeed(1000);
+    right.setMaxSpeed(1000);
+    right.setAcceleration(500);
+
+    digitalWrite(D8, LOW);
+    delay(1000);
+    left.move(100000);
+    right.move(100000);
+    // delay(2000);
+    Serial.println("Start");
+}
+void loop()
+{
+    left.run();
+    right.run();
+    // Serial.println("helloow");
+    // delay(100);
+}
+#elif HELLOWORLD == 1
+#include <RPLidar.h>
+#include <string>
+#include <SPI.h>
+#include <Wire.h>
+#include <constante.h>
+RPLidar lidar;
+HardwareSerial lidarSerial(1);
+// TaskHandle_t Task0;
+// void LidarProcess(void *);
+void setup()
+{
+    Serial.begin(115200);
+    debugPrintln("setup");
+    pinMode(Pin::IHM::LIDAR_PWM, OUTPUT);
+    analogWrite(Pin::IHM::LIDAR_PWM, 150);
+    // xTaskCreatePinnedToCore(LidarProcess, "Task0", 1000, NULL, 1, &Task0, 0);
+    // lidarSerial.end();
+    // lidarSerial.begin(115200, SERIAL_8N1,TX,RX); //attention le code ici est changé
+    lidar.begin(lidarSerial, Pin::IHM::LIDAR_RX, Pin::IHM::LIDAR_TX);
+    lidar.startScan();
+}
+typedef struct RPLidarMeasurement RPLIDARRES;
+double superanglei = 0.0;
+void loop()
+{
+    // debugPrint("loop core0 :");
+    // debugPrintln(millis());
+    // toujours au meme endroit, le IS_OK(lidar.waitPoint()) crée un stack canary watchpoint trigger sur le core 0
+    if (IS_OK(lidar.waitPoint()))
+    {
+        RPLIDARRES mesureRes = lidar.getCurrentPoint();
+        float angle = mesureRes.angle * (float)DEG_TO_RAD;
+        if (mesureRes.distance < 500)
+        {
+            float distance = mesureRes.distance;
+            float x = cos(angle) * distance;
+            float y = sin(angle) * distance;
+            debugPrint(">point:");
+            debugPrint((double)x);
+            debugPrint(":");
+            debugPrint((double)y);
+            debugPrintln("|xy");
+        }
+        debugPrint(">pointf:");
+        debugPrint((double)cos(angle) * 200);
+        debugPrint(":");
+        debugPrint((double)sin(angle) * 200);
+        // debugPrint(";");
+        // debugPrint((double)cos(0)*abs(cos(angle))*200);
+        // debugPrint(":");
+        // debugPrint((double)sin(0)*abs(sin(angle))*200);
+        // debugPrint(":");
+        // debugPrint((double)millis());
+        debugPrintln("|xy");
+        superanglei += 0.1;
+        delay(25);
+    }
+    else
+    {
+        // analogWrite(D0, 0); // stop the rplidar motor
+        debugPrintln("Lidar Stopped");
+        // try to detect RPLIDAR...
+        rplidar_response_device_info_t info;
+        if (IS_OK(lidar.getDeviceInfo(info, 100)))
+        {
+            debugPrintln("Lidar found");
+            // detected...
+            lidar.startScan();
+            // analogWrite(D0,150);
+            delay(1000);
+        }
+        else
+        {
+            debugPrintln("Lidar not found");
+        }
+    }
+    delay(25);
+}
+#elif HELLOWORLD == 2
+#include <HCSR04.h>
+HCSR04 hc(D7, D6);
+void setup()
+{
+    Serial.begin(115200);
+}
+void loop()
+{
+    Serial.println(hc.dist());
+    delay(500);
+}
+#elif HELLOWORLD == 3
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
+
+#define SERVOMIN 125
+#define SERVOMAX 575
+
+void setup()
+{
+    Serial.begin(115200);
+
+    pcacard.begin();
+    pcacard.setPWMFreq(60);
+}
+int motori = 0;
+int angleToPulse(int);
+void loop()
+{
+    int angle = 45;
+    pcacard.setPWM(14,0,angleToPulse(90-angle));
+    pcacard.setPWM(15,0,angleToPulse(angle));
+    // delay(50);
+    // pcacard.setPWM(15, 0, angleToPulse(0));
+    Serial.println("stop");
+    delay(1000);
+    // pcacard.setPWM(15,0,angleToPulse(20));
+    // delay(1000);
+}
+
+int angleToPulse(int angle)
+{
+    int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
+    return pulse;
+}
+#elif HELLOWORLD==4
+#include <Wire.h>
+#include <PCF8574.h>
+PCF8574 pcf(0x20);
+void setup(){
+    pcf.pinMode(P0,OUTPUT);
+    Serial.begin(115200);
+    pcf.pinMode(P1,INPUT);
+    pcf.begin();
+}
+void loop(){
+    uint8_t a = pcf.digitalRead(P1);
+    Serial.println(a);
+    pcf.digitalWrite(P0,a);
+    delay(1000);
+}

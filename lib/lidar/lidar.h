@@ -1,0 +1,20 @@
+#pragma once
+#include <Arduino.h>
+#include <constante.h>
+#include <RPLidar.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <string>
+#include <vector>
+void sendObstacleData(bool);
+bool obstacle(float);
+void reset_point();
+struct DirectionVector{
+    double x,y;
+};
+double calculateAngleFromDirection(DirectionVector);
+double angleInAngleRange(double);
+void checkAndSendObstacle(bool);
+void initLidar();
+void sendCurrentAngle(DirectionVector);
+bool getLidarStatus();

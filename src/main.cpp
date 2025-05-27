@@ -1,196 +1,16 @@
+// TO SET STRATEGIE SEARCH STRATDEF
 #include <Arduino.h>
-#define HELLOWORLD 99
-#if HELLOWORLD == 0
-#include <AccelStepper.h>
-AccelStepper left, right;
-void setup()
-{
-    pinMode(D8, OUTPUT);
-    pinMode(D10, INPUT_PULLUP);
-    Serial.begin(115200);
-    delay(3000);
-    Serial.println("helloworld how are you??");
-    while (!digitalRead(D10))
-    {
-        Serial.println("what the fuck?");
-        delay(100);
-    }
-    // fonction de pre_init
-    while (digitalRead(D10))
-    {
-        Serial.println("Mais t'es pas là mais t'es où?");
-        delay(100);
-    }
-    while (!digitalRead(D10))
-    {
-        Serial.println("ok t la");
-        delay(100);
-    }
-    right = AccelStepper(AccelStepper::DRIVER, D3, D2);
-    left = AccelStepper(AccelStepper::DRIVER, D1, D0);
-    left.setAcceleration(500);
-    left.setMaxSpeed(1000);
-    right.setMaxSpeed(1000);
-    right.setAcceleration(500);
-
-    digitalWrite(D8, LOW);
-    delay(1000);
-    left.move(100000);
-    right.move(100000);
-    // delay(2000);
-    Serial.println("Start");
-}
-void loop()
-{
-    left.run();
-    right.run();
-    // Serial.println("helloow");
-    // delay(100);
-}
-#elif HELLOWORLD == 1
-#include <RPLidar.h>
-#include <string>
-#include <SPI.h>
-#include <Wire.h>
-#include <constante.h>
-RPLidar lidar;
-HardwareSerial lidarSerial(1);
-// TaskHandle_t Task0;
-// void LidarProcess(void *);
-void setup()
-{
-    Serial.begin(115200);
-    debugPrintln("setup");
-    pinMode(Pin::IHM::LIDAR_PWM, OUTPUT);
-    analogWrite(Pin::IHM::LIDAR_PWM, 150);
-    // xTaskCreatePinnedToCore(LidarProcess, "Task0", 1000, NULL, 1, &Task0, 0);
-    // lidarSerial.end();
-    // lidarSerial.begin(115200, SERIAL_8N1,TX,RX); //attention le code ici est changé
-    lidar.begin(lidarSerial, Pin::IHM::LIDAR_RX, Pin::IHM::LIDAR_TX);
-    lidar.startScan();
-}
-typedef struct RPLidarMeasurement RPLIDARRES;
-double superanglei = 0.0;
-void loop()
-{
-    debugPrint("loop core0 :");
-    debugPrintln(millis());
-    // toujours au meme endroit, le IS_OK(lidar.waitPoint()) crée un stack canary watchpoint trigger sur le core 0
-    if (IS_OK(lidar.waitPoint()))
-    {
-        debugPrint(">point:");
-        RPLIDARRES mesureRes = lidar.getCurrentPoint();
-        if (mesureRes.distance < 1000)
-        {
-            float angle = mesureRes.angle * (float)DEG_TO_RAD;
-            float distance = mesureRes.distance;
-            float x = cos(angle) * distance;
-            float y = sin(angle) * distance;
-            debugPrint((double)x);
-            debugPrint(":");
-            debugPrint((double)y);
-            debugPrint(";");
-        }
-        debugPrint((double)cos(superanglei) * 200);
-        debugPrint(":");
-        debugPrint((double)sin(superanglei) * 200);
-        // debugPrint(":");
-        // debugPrint((double)millis());
-        debugPrintln("|xy");
-        superanglei += 0.1;
-        delay(50);
-    }
-    else
-    {
-        // analogWrite(D0, 0); // stop the rplidar motor
-        debugPrintln("Lidar Stopped");
-        // try to detect RPLIDAR...
-        rplidar_response_device_info_t info;
-        if (IS_OK(lidar.getDeviceInfo(info, 100)))
-        {
-            debugPrintln("Lidar found");
-            // detected...
-            lidar.startScan();
-            // analogWrite(D0,150);
-            delay(1000);
-        }
-        else
-        {
-            debugPrintln("Lidar not found");
-        }
-    }
-    delay(25);
-}
-#elif HELLOWORLD == 2
-#include <HCSR04.h>
-HCSR04 hc(D7, D6);
-void setup()
-{
-    Serial.begin(115200);
-}
-void loop()
-{
-    Serial.println(hc.dist());
-    delay(500);
-}
-#elif HELLOWORLD == 3
-#include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
-
-Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
-
-#define SERVOMIN 125
-#define SERVOMAX 575
-
-void setup()
-{
-    Serial.begin(115200);
-
-    pcacard.begin();
-    pcacard.setPWMFreq(60);
-}
-int motori = 0;
-int angleToPulse(int);
-void loop()
-{
-    int angle = 45;
-    pcacard.setPWM(14,0,angleToPulse(90-angle));
-    pcacard.setPWM(15,0,angleToPulse(angle));
-    // delay(50);
-    // pcacard.setPWM(15, 0, angleToPulse(0));
-    Serial.println("stop");
-    delay(1000);
-    // pcacard.setPWM(15,0,angleToPulse(20));
-    // delay(1000);
-}
-
-int angleToPulse(int angle)
-{
-    int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
-    return pulse;
-}
-#elif HELLOWORLD==4
-#include <Wire.h>
-#include <PCF8574.h>
-PCF8574 pcf(0x20);
-void setup(){
-    pcf.pinMode(P0,OUTPUT);
-    Serial.begin(115200);
-    pcf.pinMode(P1,INPUT);
-    pcf.begin();
-}
-void loop(){
-    uint8_t a = pcf.digitalRead(P1);
-    Serial.println(a);
-    pcf.digitalWrite(P0,a);
-    delay(1000);
-}
-#else
-#include <lidar.cpp>
+#include <lidar.h>
 #include <Robotmove.h>
 #include <PCF8574.h>
 #include <vector>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
+PCF8574 pcf(0x20);
+Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
+#define SERVOMIN 125
+#define SERVOMAX 575
 RobotMove robot;
 enum struct etat
 {
@@ -206,7 +26,6 @@ enum struct step_state
 {
     RUNNING,
     IDLE,
-    PAUSE
 };
 
 step_state etat_action = step_state::IDLE;
@@ -217,7 +36,17 @@ enum struct atype
     BACKWARD,
     TURN,
     TURNTO,
-    MOVETO
+    MOVETO,
+    FERMER_AIMANTS,
+    OUVRIR_AIMANTS,
+    MONTER_ACTIONNEUR,
+    DESCENDRE_ACTIONNEUR,
+    MILLIEU_ACTIONNEUR,
+    OUVRIR_BRAS,
+    FERMER_BRAS,
+    ACTIVER_POMPE,
+    DESACTIVER_POMPE,
+    WAIT
 };
 
 struct etape
@@ -227,13 +56,14 @@ struct etape
     RobotMove::Coord coordonnees;
     double angle;
     int vitesse;
+    int time;
 };
 
 typedef std::vector<etape> strategie;
 
 
 typedef atype A;
-constexpr int DEFAULT_SPEED=1000;
+constexpr int DEFAULT_SPEED=8000;
 /// @brief Créer une étape pour faire avancer le robot
 /// @param d la distance en cm
 /// @param v la vitesse en step/s (par défault à 1000)
@@ -269,12 +99,109 @@ etape TURNTO(double a,int v=DEFAULT_SPEED){
 etape MOVETO(RobotMove::Coord c,int v=DEFAULT_SPEED){
     return etape{.action=A::MOVETO, .coordonnees=c,.vitesse=v};
 }
+/// @brief FERMER aimants
+/// @return étape
+etape FERMER_AIMANTS(){
+    return etape{.action=A::FERMER_AIMANTS};
+}
+/// @brief OUVRIR AIMANTS
+/// @return étape
+etape OUVRIR_AIMANTS(){
+    return etape{.action=A::OUVRIR_AIMANTS};
+}
+/// @brief MONTER actionneur
+/// @return étape
+etape MONTER_ACTIONNEUR(){
+    return etape{.action=A::MONTER_ACTIONNEUR};
+}
+/// @brief DESCENDRE actionneur
+/// @return étape
+etape DESCENDRE_ACTIONNEUR(){
+    return etape{.action=A::DESCENDRE_ACTIONNEUR};
+}
+/// @brief MILLIEU actionneur
+/// @return étape
+etape MILLIEU_ACTIONNEUR(){
+    return etape{.action=A::MILLIEU_ACTIONNEUR};
+}
+etape OUVRIR_BRAS(){
+    return etape{.action=A::OUVRIR_BRAS};
+}
+etape FERMER_BRAS(){
+    return etape{.action=A::FERMER_BRAS};
+}
+etape ACTIVER_POMPE(){
+    return etape{.action=A::ACTIVER_POMPE};
+}
+etape DESACTIVER_POMPE(){
+    return etape{.action=A::DESACTIVER_POMPE};
+}
+etape WAIT(int time){
+    return etape{.action=A::WAIT,.time=time};
+}
 
+
+int angleToPulse(int);
+void fermer_aimants()
+{
+    pcacard.setPWM(13,0,angleToPulse(0));
+    pcacard.setPWM(14,0,angleToPulse(90));
+    delay(1000);
+}
+void ouvrir_aimants(){
+    pcacard.setPWM(13,0,angleToPulse(45));
+    pcacard.setPWM(14,0,angleToPulse(45));
+    delay(1000);
+}
+void monter_actionneur(){
+    pcacard.setPWM(15,0,angleToPulse(50));
+    delay(1000);
+}
+void descendre_actionneur(){
+    pcacard.setPWM(15,0,angleToPulse(23));
+    delay(3000);
+}
+void millieu_actionneur(){
+    pcacard.setPWM(15,0,angleToPulse(45));
+    delay(1000);
+}
+void ouvrir_bras(){
+    pcacard.setPWM(11,0,angleToPulse(90-0));
+    pcacard.setPWM(12,0,angleToPulse(0));
+    delay(1000);
+}
+void fermer_bras(){
+    pcacard.setPWM(11,0,angleToPulse(90-45));
+    pcacard.setPWM(12,0,angleToPulse(45));
+    delay(1000);
+}
+void activer_pompe(){
+    pcf.digitalWrite(P4,HIGH);
+}
+void desactiver_pompe(){
+    pcf.digitalWrite(P4,LOW);
+}
+int angleToPulse(int angle)
+{
+    int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
+    return pulse;
+}
+
+void debugMode();
+// JUMP HERE TO SET STRATEGIE:
+// STRATDEF
 /// @brief La stratégie numéro un du robot
 strategie stratun = strategie{
-    FORWARD(100000),
-    BACKWARD(1000),
-    MOVETO({1000,1000})
+    // FORWARD(40*1000),
+    // DESCENDRE_ACTIONNEUR(),
+    // OUVRIR_AIMANTS(),
+    // FORWARD(10),
+    // MILLIEU_ACTIONNEUR(),
+    // BACKWARD(10),
+    // TURN(180),
+    // FORWARD(30),
+    // DESCENDRE_ACTIONNEUR(),
+    // FERMER_AIMANTS()
 };
 
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
@@ -313,7 +240,36 @@ void actioncall(etape step)
 
     case atype::MOVETO:
         return robot.moveTo(step.coordonnees, step.vitesse);
-
+    case atype::OUVRIR_AIMANTS:
+        return ouvrir_aimants();
+        break;
+    case atype::FERMER_AIMANTS:
+        return fermer_aimants();
+        break;
+    case atype::MONTER_ACTIONNEUR:
+        return monter_actionneur();
+        break;
+    case atype::DESCENDRE_ACTIONNEUR:
+        return descendre_actionneur();
+        break;
+    case atype::MILLIEU_ACTIONNEUR:
+        return millieu_actionneur();
+        break;
+    case atype::OUVRIR_BRAS:
+        return ouvrir_bras();
+        break;
+    case atype::FERMER_BRAS:
+        return fermer_bras();
+        break;
+    case atype::ACTIVER_POMPE:
+        return activer_pompe();
+        break;
+    case atype::DESACTIVER_POMPE:
+        return desactiver_pompe();
+        break;
+    case atype::WAIT:
+        return delay(step.time);
+        break;
     default:
         break;
     }
@@ -326,11 +282,22 @@ bool actionfini()
     return robot.reachedtarget();
 }
 
+bool debugmode=false;
+
 /// @brief fonction d'initialisation
 void setup()
 {
     Serial.begin(115200);
+    pcacard.begin();
+    pcacard.setPWMFreq(60);
+    pcf.begin();
+    pcf.pinMode(P0,INPUT);
+    pcf.pinMode(P1,INPUT);
+    pcf.pinMode(P2,INPUT);
+    pcf.pinMode(P3,INPUT);
+    delay(1000);
     pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
+    initLidar();
     while (!digitalRead(Pin::IHM::TIRETTE))
     {
         Serial.println("what the fuck?");
@@ -342,15 +309,25 @@ void setup()
         Serial.println("Mais t'es pas là mais t'es où?");
         delay(100);
     }
-    pinMode(Pin::Driver::EN, OUTPUT);
-    digitalWrite(Pin::Driver::EN, LOW);
+    if(!pcf.digitalRead(P1)&&!pcf.digitalRead(P2)&&!pcf.digitalRead(P3)){
+        //enter debug mode
+        debugmode=true;
+    }
+    pinMode(D8, OUTPUT);
+    digitalWrite(D8, LOW);
     etat_a = etat::INITALISATION;
     delay(1000);
 }
+
 bool showed_step = false;
+bool isPaused=false;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
+    if(debugmode){
+        debugMode();
+        return;
+    }
     if (etat_a != etat::MATCH)
     {
         if (etat_a == etat::FIN)
@@ -371,6 +348,16 @@ void loop()
         }
         delay(100);
         return;
+    }
+    if(getLidarStatus()){
+        // debugPrint("paused by lidar at ");debugPrintln(millis());
+        // delay(200);
+        if(!isPaused){robot.stop();isPaused=true;}
+        robot.run();
+        return;
+    }
+    else{
+        if(isPaused){robot.resume();isPaused=false;}
     }
     if (etat_action == step_state::RUNNING and actionfini())
     {
@@ -393,8 +380,17 @@ void loop()
     }
     else if (etat_action == step_state::IDLE)
     {
-        if (etapeencour >= stratun.size())
+        if (etapeencour+1== stratun.size())
         { // etapesuivante =etapeencours + 1; par rapport à size() = etapesuivante -1; donc = etapeencour+1-1
+            debugPrintln("hello fucking world ?");
+            debugPrintln(etapeencour);
+            debugPrintln(stratun.size());
+            debugPrintln("ok");
+            delay(250);
+            etapeencour++;
+            return;
+        }
+        if(etapeencour+1>stratun.size()){
             return;
         }
         showed_step = false;
@@ -413,5 +409,52 @@ void loop()
     }
 }
 
-#endif
-
+void debugMode(){
+    // if(!pcf.digitalRead(P0)){
+    //     debugPrint("helloP0");debugPrintln(millis());
+    // }
+    // if(!pcf.digitalRead(P1)){
+    //     debugPrint("helloP1");debugPrintln(millis());
+    // }
+    // if(!pcf.digitalRead(P2)){
+    //     debugPrint("helloP2");debugPrintln(millis());
+    // }
+    // if(!pcf.digitalRead(P3)){
+    //     debugPrint("helloP3");debugPrintln(millis());
+    // }
+    // delay(500);
+    int code = 0;
+    if(!pcf.digitalRead(P3)) code+=1;
+    if(!pcf.digitalRead(P2)) code+=10;
+    if(!pcf.digitalRead(P1)) code+=100;
+    debugPrintln(((std::string)"debugMode: code actuel en écriture: "+std::to_string(code)).c_str());
+    if(!pcf.digitalRead(P0)){
+        // CODE 100 = MONTER
+        if(code==100){
+            monter_actionneur();
+            debugPrintln("monter actionneur");
+        }
+        // CODE 001 = DESCENDRE
+        if(code==1){
+            descendre_actionneur();
+            debugPrintln("descendre actionneur");
+        }
+        // CODE 110 = ouvrir aimants
+        if(code==110){
+            ouvrir_aimants();
+            debugPrintln("ouvrir aimants");
+        }
+        // CODE 011 = fermer aimants
+        if(code==11){
+            fermer_aimants();
+            debugPrintln("fermer aimants");
+        }
+        // CODE 010 = milieu actionneur
+        if(code==10){
+            millieu_actionneur();
+            debugPrintln("milieu actionneur");
+        }
+        debugPrintln("activation code");
+    }
+    delay(250);
+}

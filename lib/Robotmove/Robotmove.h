@@ -1,5 +1,6 @@
 #include <constante.h>
 #include <AccelStepper.h>
+#include <lidar.h>
 class RobotMove
 {
 protected:
@@ -17,7 +18,9 @@ protected:
     AccelStepper
         stepper_gauche,
         stepper_droit;
-
+    struct CurAction {int left, right;};
+    CurAction currentaction;
+    bool paused=false;
 public:
     struct Coord
     {
@@ -42,4 +45,6 @@ public:
     void turn(double angle, int vitesse);
     void setCoord(Coord startCoord);
     void debugPosition();
+    void stop();
+    void resume();
 };
