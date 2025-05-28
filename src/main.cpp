@@ -10,31 +10,57 @@
 constexpr bool pamimode = false;
 
 // CODE NECESSAIRE AVANT DECLARATION DE STRATEGIE
-enum struct atype{FORWARD,BACKWARD,TURN,TURNTO,MOVETO,FERMER_AIMANTS,OUVRIR_AIMANTS,MONTER_ACTIONNEUR,DESCENDRE_ACTIONNEUR,MILLIEU_ACTIONNEUR,OUVRIR_BRAS,FERMER_BRAS,ACTIVER_POMPE,DESACTIVER_POMPE,WAIT};
+enum struct atype
+{
+    FORWARD,
+    BACKWARD,
+    TURN,
+    TURNTO,
+    MOVETO,
+    FERMER_AIMANTS,
+    OUVRIR_AIMANTS,
+    MONTER_ACTIONNEUR,
+    DESCENDRE_ACTIONNEUR,
+    MILLIEU_ACTIONNEUR,
+    OUVRIR_BRAS,
+    FERMER_BRAS,
+    ACTIVER_POMPE,
+    DESACTIVER_POMPE,
+    WAIT
+};
 typedef atype A;
-struct etape{atype action;int distance;RobotMove::Coord coordonnees;double angle;int vitesse;int time;};
-constexpr int DEFAULT_SPEED=8000;
-etape FORWARD(int d,int v=DEFAULT_SPEED){return etape{.action=A::FORWARD,.distance=d,.vitesse=v};}
-etape BACKWARD(int d,int v=DEFAULT_SPEED){return etape{.action=A::BACKWARD,.distance=d,.vitesse=v};}
-etape TURN(double a,int v=DEFAULT_SPEED){return etape{.action=A::TURN, .angle=a,.vitesse=v};}
-etape TURNTO(double a,int v=DEFAULT_SPEED){return etape{.action=A::TURNTO, .angle=a,.vitesse=v};}
-etape MOVETO(RobotMove::Coord c,int v=DEFAULT_SPEED){return etape{.action=A::MOVETO, .coordonnees=c,.vitesse=v};}
-etape FERMER_AIMANTS(){return etape{.action=A::FERMER_AIMANTS};}
-etape OUVRIR_AIMANTS(){return etape{.action=A::OUVRIR_AIMANTS};}
-etape MONTER_ACTIONNEUR(){return etape{.action=A::MONTER_ACTIONNEUR};}
-etape DESCENDRE_ACTIONNEUR(){return etape{.action=A::DESCENDRE_ACTIONNEUR};}
-etape MILLIEU_ACTIONNEUR(){return etape{.action=A::MILLIEU_ACTIONNEUR};}
-etape OUVRIR_BRAS(){return etape{.action=A::OUVRIR_BRAS};}
-etape FERMER_BRAS(){return etape{.action=A::FERMER_BRAS};}
-etape ACTIVER_POMPE(){return etape{.action=A::ACTIVER_POMPE};}
-etape DESACTIVER_POMPE(){return etape{.action=A::DESACTIVER_POMPE};}
-etape WAIT(int time){return etape{.action=A::WAIT,.time=time};}
+struct etape
+{
+    atype action;
+    int distance;
+    RobotMove::Coord coordonnees;
+    double angle;
+    int vitesse;
+    int time;
+};
+constexpr int DEFAULT_SPEED = 8000;
+etape FORWARD(int d, int v = DEFAULT_SPEED) { return etape{.action = A::FORWARD, .distance = d, .vitesse = v}; }
+etape BACKWARD(int d, int v = DEFAULT_SPEED) { return etape{.action = A::BACKWARD, .distance = d, .vitesse = v}; }
+etape TURN(double a, int v = DEFAULT_SPEED) { return etape{.action = A::TURN, .angle = a, .vitesse = v}; }
+etape TURNTO(double a, int v = DEFAULT_SPEED) { return etape{.action = A::TURNTO, .angle = a, .vitesse = v}; }
+etape MOVETO(RobotMove::Coord c, int v = DEFAULT_SPEED) { return etape{.action = A::MOVETO, .coordonnees = c, .vitesse = v}; }
+etape FERMER_AIMANTS() { return etape{.action = A::FERMER_AIMANTS}; }
+etape OUVRIR_AIMANTS() { return etape{.action = A::OUVRIR_AIMANTS}; }
+etape MONTER_ACTIONNEUR() { return etape{.action = A::MONTER_ACTIONNEUR}; }
+etape DESCENDRE_ACTIONNEUR() { return etape{.action = A::DESCENDRE_ACTIONNEUR}; }
+etape MILLIEU_ACTIONNEUR() { return etape{.action = A::MILLIEU_ACTIONNEUR}; }
+etape OUVRIR_BRAS() { return etape{.action = A::OUVRIR_BRAS}; }
+etape FERMER_BRAS() { return etape{.action = A::FERMER_BRAS}; }
+etape ACTIVER_POMPE() { return etape{.action = A::ACTIVER_POMPE}; }
+etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
+etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
 typedef std::vector<etape> strategie;
+PCF8574 pcf(0x20);
 
 // DÉFINITION DE LA STRATÉGIE
 
 /// @brief La stratégie numéro un du robot
-strategie stratdemo = strategie{
+strategie stratdemoservo = strategie{
     MILLIEU_ACTIONNEUR(),
     // WAIT(2000),
     // DESCENDRE_ACTIONNEUR(),
@@ -43,31 +69,50 @@ strategie stratdemo = strategie{
     // WAIT(2000),
     // FERMER_AIMANTS(),
     // WAIT(1000),
-    // ACTIVER_POMPE(),
+    // OUVRIR_BRAS(),
     // WAIT(2000),
-    // DESACTIVER_POMPE(),
+    // FERMER_BRAS(),
 };
-strategie stratun = strategie{};
+strategie stratun = strategie{
+    FORWARD(40*1000),
+    // DESCENDRE_ACTIONNEUR(),
+    // OUVRIR_AIMANTS(),
+    // FORWARD(10),
+    // MILLIEU_ACTIONNEUR(),
+    // BACKWARD(10),
+    // TURN(180),
+    // FORWARD(30),
+    // DESCENDRE_ACTIONNEUR(),
+    // FERMER_AIMANTS()
+    };
 
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
-strategie strat = stratdemo;
-void choixStrategie(){
+strategie strat = stratun;
+void choixStrategie()
+{
+    // while (1)
+    // {
     // en théorie code 111 réservé pour debugMode donc préferable de ne pas utiliser
-    int code = 0;
-    if(!pcf.digitalRead(P3)) code+=1;
-    if(!pcf.digitalRead(P2)) code+=10;
-    if(!pcf.digitalRead(P1)) code+=100;
-    debugPrintln(((std::string)"debugMode: code actuel en écriture: "+std::to_string(code)).c_str());
-    if(code==1){
-
-    }else if(code==10){
-        
-    }
+    // int code = 0;
+    // if (!pcf.digitalRead(P3))
+    //     code += 1;
+    // if (!pcf.digitalRead(P2))
+    //     code += 10;
+    // if (!pcf.digitalRead(P1))
+    //     code += 100;
+    // debugPrintln(((std::string) "debugMode: code actuel en écriture: " + std::to_string(code)).c_str());
+    // if (code == 1)
+    // {
+    // }
+    // else if (code == 10)
+    // {
+    // }
+    // delay(1000);
+    // }
 }
 
 // DEBUT DU CODE PUR ET DUR
 
-PCF8574 pcf(0x20);
 Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
 #define SERVOMIN 125
 #define SERVOMAX 575
@@ -90,61 +135,73 @@ enum struct step_state
 
 step_state etat_action = step_state::IDLE;
 
-
 typedef std::vector<etape> strategie;
-
-
-
-
 
 int angleToPulse(int);
 void fermer_aimants()
 {
-    if(pamimode)return;
-    pcacard.setPWM(13,0,angleToPulse(70));
-    pcacard.setPWM(14,0,angleToPulse(70));
+    if (pamimode)
+        return;
+    pcacard.setPWM(13, 0, angleToPulse(70));
+    pcacard.setPWM(14, 0, angleToPulse(70));
     delay(1000);
 }
-void ouvrir_aimants(){
-    if(pamimode)return;
-    pcacard.setPWM(13,0,angleToPulse(45));
-    pcacard.setPWM(14,0,angleToPulse(45));
+void ouvrir_aimants()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(13, 0, angleToPulse(45));
+    pcacard.setPWM(14, 0, angleToPulse(45));
     delay(1000);
 }
-void monter_actionneur(){
-    if(pamimode)return;
-    pcacard.setPWM(15,0,angleToPulse(50));
+void monter_actionneur()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(0, 0, angleToPulse(50));
     delay(1000);
 }
-void descendre_actionneur(){
-    if(pamimode)return;
-    pcacard.setPWM(15,0,angleToPulse(23));
+void descendre_actionneur()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(0, 0, angleToPulse(15));
     delay(3000);
 }
-void millieu_actionneur(){
-    if(pamimode)return;
-    pcacard.setPWM(15,0,angleToPulse(45));
+void millieu_actionneur()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(0, 0, angleToPulse(37));
     delay(1000);
 }
-void ouvrir_bras(){
-    if(pamimode)return;
-    pcacard.setPWM(11,0,angleToPulse(90-0));
-    pcacard.setPWM(12,0,angleToPulse(0));
+void ouvrir_bras()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(11, 0, angleToPulse(90 - 0));
+    pcacard.setPWM(12, 0, angleToPulse(0));
     delay(1000);
 }
-void fermer_bras(){
-    if(pamimode)return;
-    pcacard.setPWM(11,0,angleToPulse(90-45));
-    pcacard.setPWM(12,0,angleToPulse(45));
+void fermer_bras()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(11, 0, angleToPulse(90 - 45));
+    pcacard.setPWM(12, 0, angleToPulse(45));
     delay(1000);
 }
-void activer_pompe(){
-    if(pamimode)return;
-    pcf.digitalWrite(P5,HIGH);
+void activer_pompe()
+{
+    if (pamimode)
+        return;
+    pcf.digitalWrite(P5, HIGH);
 }
-void desactiver_pompe(){
-    if(pamimode)return;
-    pcf.digitalWrite(P5,LOW);
+void desactiver_pompe()
+{
+    if (pamimode)
+        return;
+    pcf.digitalWrite(P5, LOW);
 }
 int angleToPulse(int angle)
 {
@@ -162,22 +219,27 @@ void actioncall(etape step)
     switch (step.action)
     {
     case atype::FORWARD:
-        
+
         return robot.forward(step.distance, step.vitesse);
         break;
 
     case atype::BACKWARD:
-        sendCurrentAngle({0,-1});
+        sendCurrentAngle({0, -1});
         return robot.backward(step.distance, step.vitesse);
         break;
 
     case atype::TURN:
-        if(step.angle>0){
-            sendCurrentAngle({0.5,0.5});
-        }else if(step.angle<0){
-            sendCurrentAngle({-0.5,0.5});
-        }else{
-            sendCurrentAngle({0,1});
+        if (step.angle > 0)
+        {
+            sendCurrentAngle({0.5, 0.5});
+        }
+        else if (step.angle < 0)
+        {
+            sendCurrentAngle({-0.5, 0.5});
+        }
+        else
+        {
+            sendCurrentAngle({0, 1});
         }
         return robot.turn(step.angle, step.vitesse);
 
@@ -229,7 +291,7 @@ bool actionfini()
     return robot.reachedtarget();
 }
 
-bool debugmode=false;
+bool debugmode = false;
 
 /// @brief fonction d'initialisation
 void setup()
@@ -238,28 +300,29 @@ void setup()
     pcacard.begin();
     pcacard.setPWMFreq(60);
     pcf.begin();
-    pcf.pinMode(P0,INPUT);
-    pcf.pinMode(P1,INPUT);
-    pcf.pinMode(P2,INPUT);
-    pcf.pinMode(P3,INPUT);
-    pcf.pinMode(P4,OUTPUT);
+    pcf.pinMode(P0, INPUT);
+    pcf.pinMode(P1, INPUT);
+    pcf.pinMode(P2, INPUT);
+    pcf.pinMode(P3, INPUT);
+    pcf.pinMode(P4, OUTPUT);
     delay(1000);
     pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
     initLidar();
     while (!digitalRead(Pin::IHM::TIRETTE))
     {
-        Serial.println("what the fuck?");
+        debugPrintln("what the fuck?");
         delay(100);
     }
     // fonction de pre_init
     while (digitalRead(Pin::IHM::TIRETTE))
     {
-        Serial.println("Mais t'es pas là mais t'es où?");
+        debugPrintln("Mais t'es pas là mais t'es où?");
         delay(100);
     }
-    if(!pcf.digitalRead(P1)&&!pcf.digitalRead(P2)&&!pcf.digitalRead(P3)){
-        //enter debug mode
-        debugmode=true;
+    if (!pcf.digitalRead(P1) && !pcf.digitalRead(P2) && !pcf.digitalRead(P3))
+    {
+        // enter debug mode
+        debugmode = true;
     }
     choixStrategie();
     pinMode(D8, OUTPUT);
@@ -269,7 +332,7 @@ void setup()
 }
 
 bool showed_step = false;
-bool isPaused=false;
+bool isPaused = false;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -286,50 +349,60 @@ void loop()
         if (not(digitalRead(Pin::IHM::TIRETTE)))
         {
 
-            Serial.println("Jchuis là");
+            debugPrintln("Jchuis là");
             // delay(100);
         }
         else
         {
             etat_a = etat::MATCH;
-            Serial.println("fin setup");
+            debugPrintln("fin setup");
             // delay(100);
         }
         delay(100);
         return;
     }
-    if(getLidarStatus()){
+    if (getLidarStatus())
+    {
         // debugPrint("paused by lidar at ");debugPrintln(millis());
         // delay(200);
-        if(!isPaused){robot.stop();isPaused=true;}
+        if (!isPaused)
+        {
+            robot.stop();
+            isPaused = true;
+        }
         robot.run();
         return;
     }
-    else{
-        if(isPaused){robot.resume();isPaused=false;}
+    else
+    {
+        if (isPaused)
+        {
+            robot.resume();
+            isPaused = false;
+        }
     }
     if (etat_action == step_state::RUNNING and actionfini())
     {
         etat_action = step_state::IDLE;
-        Serial.println("end");
-        // Serial.println("running one !");
+        debugPrintln("end");
+        // debugPrintln("running one !");
     }
     else if (etat_action == step_state::RUNNING)
     {
         if (!showed_step)
         {
-            Serial.println("hello");
+            debugPrintln("hello");
             delay(100);
             showed_step = true;
         }
         robot.run();
         // robot.debugPosition();
-        // Serial.println("running two !");
+        // debugPrintln("running two !");
         // delay(100);
     }
     else if (etat_action == step_state::IDLE)
     {
-        if (etapeencour+1== strat.size())
+        if (etapeencour + 1 == strat.size())
         { // etapesuivante =etapeencours + 1; par rapport à size() = etapesuivante -1; donc = etapeencour+1-1
             debugPrintln("hello fucking world ?");
             debugPrintln(etapeencour);
@@ -339,26 +412,28 @@ void loop()
             etapeencour++;
             return;
         }
-        if(etapeencour+1>strat.size()){
+        if (etapeencour + 1 > strat.size())
+        {
             return;
         }
         showed_step = false;
         etapeencour++;
         actioncall(strat[etapeencour]);
         etat_action = step_state::RUNNING;
-        Serial.print("running three ! at step");
-        Serial.println(etapeencour);
+        debugPrint("running three ! at step");
+        debugPrintln(etapeencour);
         delay(100);
     }
     else
     {
         etat_action = step_state::IDLE;
-        Serial.println("running four !");
+        debugPrintln("running four !");
         delay(200);
     }
 }
 
-void debugMode(){
+void debugMode()
+{
     // if(!pcf.digitalRead(P0)){
     //     debugPrint("helloP0");debugPrintln(millis());
     // }
@@ -373,33 +448,42 @@ void debugMode(){
     // }
     // delay(500);
     int code = 0;
-    if(!pcf.digitalRead(P3)) code+=1;
-    if(!pcf.digitalRead(P2)) code+=10;
-    if(!pcf.digitalRead(P1)) code+=100;
-    debugPrintln(((std::string)"debugMode: code actuel en écriture: "+std::to_string(code)).c_str());
-    if(!pcf.digitalRead(P0)){
+    if (!pcf.digitalRead(P3))
+        code += 1;
+    if (!pcf.digitalRead(P2))
+        code += 10;
+    if (!pcf.digitalRead(P1))
+        code += 100;
+    debugPrintln(((std::string) "debugMode: code actuel en écriture: " + std::to_string(code)).c_str());
+    if (!pcf.digitalRead(P0))
+    {
         // CODE 100 = MONTER
-        if(code==100){
+        if (code == 100)
+        {
             monter_actionneur();
             debugPrintln("monter actionneur");
         }
         // CODE 001 = DESCENDRE
-        if(code==1){
+        if (code == 1)
+        {
             descendre_actionneur();
             debugPrintln("descendre actionneur");
         }
         // CODE 110 = ouvrir aimants
-        if(code==110){
+        if (code == 110)
+        {
             ouvrir_aimants();
             debugPrintln("ouvrir aimants");
         }
         // CODE 011 = fermer aimants
-        if(code==11){
+        if (code == 11)
+        {
             fermer_aimants();
             debugPrintln("fermer aimants");
         }
         // CODE 010 = milieu actionneur
-        if(code==10){
+        if (code == 10)
+        {
             millieu_actionneur();
             debugPrintln("milieu actionneur");
         }

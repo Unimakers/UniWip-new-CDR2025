@@ -5,7 +5,7 @@ HardwareSerial lidarSerial(1);
 // HardwareSerial lidarSerial(1);
 TaskHandle_t Task0;
 
-int DIST_OBSTACLE = 550;
+int DIST_OBSTACLE = 350;
 int QUALITY = 14;
 int MEAN_ALLOWED = 2;
 
@@ -40,6 +40,7 @@ double calculateAngleFromDirection(DirectionVector v){
 double currentDirectionAngle=0;
 
 double angleInAngleRange(double angle_to_check){
+    return true;
     return (angle_to_check)>=clampAngle(currentDirectionAngle-80) and (angle_to_check)<=clampAngle(currentDirectionAngle+80);
 }
 // bool angleInRange()
@@ -92,10 +93,10 @@ void get_point_lidar()
                 // debugPrintln(((std::string)("d"+std::to_string(mesure.distance))).c_str());
                 if (obstacle(mesure.distance))
                 {
-                    // double xPoint = cos(mesure.angle) * mesure.distance;
-                    // double yPoint = sin(mesure.angle) * mesure.distance;
+                    double xPoint = cos(mesure.angle) * mesure.distance;
+                    double yPoint = sin(mesure.angle) * mesure.distance;
                     // debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
-                    debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
+                    // debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
                     supobstacleval=true;
                 }
                 else{
@@ -108,7 +109,7 @@ void get_point_lidar()
             }
         }
         checkAndSendObstacle(supobstacleval);
-        // delay(250);
+        delay(25);
     }
     else
     {
@@ -196,7 +197,7 @@ bool Angle_in_range_scare()
 // FONCTION COEUR 0 (COUEUR LIDAR)
 bool obstacle(float distance)
 {
-    if (distance < DIST_OBSTACLE && distance > 1)
+    if (distance < DIST_OBSTACLE && distance > 5)
     {
         return true;
     }

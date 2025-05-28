@@ -120,9 +120,9 @@ void RobotMove::moveTo(Coord coord, int vitesse)
     vitesse_mT = vitesse;
 }
 void RobotMove::debugPosition(){
-    Serial.print(stepper_gauche.currentPosition());
-    Serial.print(";;");
-    Serial.println(stepper_droit.currentPosition());
+    debugPrint(stepper_gauche.currentPosition());
+    debugPrint(";;");
+    debugPrintln(stepper_droit.currentPosition());
 }
 void RobotMove::stop(){
     if(paused)return;

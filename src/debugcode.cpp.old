@@ -9,21 +9,21 @@ void setup()
     pinMode(D10, INPUT_PULLUP);
     Serial.begin(115200);
     delay(3000);
-    Serial.println("helloworld how are you??");
+    debugPrintln("helloworld how are you??");
     while (!digitalRead(D10))
     {
-        Serial.println("what the fuck?");
+        debugPrintln("what the fuck?");
         delay(100);
     }
     // fonction de pre_init
     while (digitalRead(D10))
     {
-        Serial.println("Mais t'es pas là mais t'es où?");
+        debugPrintln("Mais t'es pas là mais t'es où?");
         delay(100);
     }
     while (!digitalRead(D10))
     {
-        Serial.println("ok t la");
+        debugPrintln("ok t la");
         delay(100);
     }
     right = AccelStepper(AccelStepper::DRIVER, D3, D2);
@@ -38,13 +38,13 @@ void setup()
     left.move(100000);
     right.move(100000);
     // delay(2000);
-    Serial.println("Start");
+    debugPrintln("Start");
 }
 void loop()
 {
     left.run();
     right.run();
-    // Serial.println("helloow");
+    // debugPrintln("helloow");
     // delay(100);
 }
 #elif HELLOWORLD == 1
@@ -135,7 +135,7 @@ void setup()
 }
 void loop()
 {
-    Serial.println(hc.dist());
+    debugPrintln(hc.dist());
     delay(500);
 }
 #elif HELLOWORLD == 3
@@ -163,7 +163,7 @@ void loop()
     pcacard.setPWM(15,0,angleToPulse(angle));
     // delay(50);
     // pcacard.setPWM(15, 0, angleToPulse(0));
-    Serial.println("stop");
+    debugPrintln("stop");
     delay(1000);
     // pcacard.setPWM(15,0,angleToPulse(20));
     // delay(1000);
@@ -186,7 +186,7 @@ void setup(){
 }
 void loop(){
     uint8_t a = pcf.digitalRead(P1);
-    Serial.println(a);
+    debugPrintln(a);
     pcf.digitalWrite(P0,a);
     delay(1000);
 }
