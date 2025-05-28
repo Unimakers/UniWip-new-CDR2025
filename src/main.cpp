@@ -7,6 +7,8 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+constexpr bool pamimode = false;
+
 // CODE NECESSAIRE AVANT DECLARATION DE STRATEGIE
 enum struct atype{FORWARD,BACKWARD,TURN,TURNTO,MOVETO,FERMER_AIMANTS,OUVRIR_AIMANTS,MONTER_ACTIONNEUR,DESCENDRE_ACTIONNEUR,MILLIEU_ACTIONNEUR,OUVRIR_BRAS,FERMER_BRAS,ACTIVER_POMPE,DESACTIVER_POMPE,WAIT};
 typedef atype A;
@@ -34,16 +36,16 @@ typedef std::vector<etape> strategie;
 /// @brief La stratégie numéro un du robot
 strategie stratdemo = strategie{
     MILLIEU_ACTIONNEUR(),
-    WAIT(2000),
-    DESCENDRE_ACTIONNEUR(),
-    WAIT(1000),
-    OUVRIR_AIMANTS(),
-    WAIT(2000),
-    FERMER_AIMANTS(),
-    WAIT(1000),
-    ACTIVER_POMPE(),
-    WAIT(2000),
-    DESACTIVER_POMPE(),
+    // WAIT(2000),
+    // DESCENDRE_ACTIONNEUR(),
+    // WAIT(1000),
+    // OUVRIR_AIMANTS(),
+    // WAIT(2000),
+    // FERMER_AIMANTS(),
+    // WAIT(1000),
+    // ACTIVER_POMPE(),
+    // WAIT(2000),
+    // DESACTIVER_POMPE(),
 };
 strategie stratun = strategie{};
 
@@ -98,41 +100,50 @@ typedef std::vector<etape> strategie;
 int angleToPulse(int);
 void fermer_aimants()
 {
+    if(pamimode)return;
     pcacard.setPWM(13,0,angleToPulse(70));
     pcacard.setPWM(14,0,angleToPulse(70));
     delay(1000);
 }
 void ouvrir_aimants(){
+    if(pamimode)return;
     pcacard.setPWM(13,0,angleToPulse(45));
     pcacard.setPWM(14,0,angleToPulse(45));
     delay(1000);
 }
 void monter_actionneur(){
+    if(pamimode)return;
     pcacard.setPWM(15,0,angleToPulse(50));
     delay(1000);
 }
 void descendre_actionneur(){
+    if(pamimode)return;
     pcacard.setPWM(15,0,angleToPulse(23));
     delay(3000);
 }
 void millieu_actionneur(){
+    if(pamimode)return;
     pcacard.setPWM(15,0,angleToPulse(45));
     delay(1000);
 }
 void ouvrir_bras(){
+    if(pamimode)return;
     pcacard.setPWM(11,0,angleToPulse(90-0));
     pcacard.setPWM(12,0,angleToPulse(0));
     delay(1000);
 }
 void fermer_bras(){
+    if(pamimode)return;
     pcacard.setPWM(11,0,angleToPulse(90-45));
     pcacard.setPWM(12,0,angleToPulse(45));
     delay(1000);
 }
 void activer_pompe(){
+    if(pamimode)return;
     pcf.digitalWrite(P5,HIGH);
 }
 void desactiver_pompe(){
+    if(pamimode)return;
     pcf.digitalWrite(P5,LOW);
 }
 int angleToPulse(int angle)
