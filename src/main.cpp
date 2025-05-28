@@ -45,9 +45,23 @@ strategie stratdemo = strategie{
     WAIT(2000),
     DESACTIVER_POMPE(),
 };
+strategie stratun = strategie{};
 
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
 strategie strat = stratdemo;
+void choixStrategie(){
+    // en théorie code 111 réservé pour debugMode donc préferable de ne pas utiliser
+    int code = 0;
+    if(!pcf.digitalRead(P3)) code+=1;
+    if(!pcf.digitalRead(P2)) code+=10;
+    if(!pcf.digitalRead(P1)) code+=100;
+    debugPrintln(((std::string)"debugMode: code actuel en écriture: "+std::to_string(code)).c_str());
+    if(code==1){
+
+    }else if(code==10){
+        
+    }
+}
 
 // DEBUT DU CODE PUR ET DUR
 
@@ -236,6 +250,7 @@ void setup()
         //enter debug mode
         debugmode=true;
     }
+    choixStrategie();
     pinMode(D8, OUTPUT);
     digitalWrite(D8, LOW);
     etat_a = etat::INITALISATION;
