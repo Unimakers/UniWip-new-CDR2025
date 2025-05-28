@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#define HELLOWORLD 0
 #if HELLOWORLD == 0
 #include <AccelStepper.h>
 AccelStepper left, right;
@@ -188,3 +190,4 @@ void loop(){
     pcf.digitalWrite(P0,a);
     delay(1000);
 }
+#endif
