@@ -1,60 +1,55 @@
 // TO SET STRATEGIE SEARCH STRATDEF
 #include <Arduino.h>
-#define HELLOWORLD 99
-#if HELLOWORLD == 0
-#include <AccelStepper.h>
-AccelStepper left, right;
-void setup()
-{
-    pinMode(D8, OUTPUT);
-    pinMode(D10, INPUT_PULLUP);
-    Serial.begin(115200);
-    delay(3000);
-    Serial.println("helloworld how are you??");
-    while (!digitalRead(D10))
-    {
-        Serial.println("what the fuck?");
-        delay(100);
-    }
-    // fonction de pre_init
-    while (digitalRead(D10))
-    {
-        Serial.println("Mais t'es pas là mais t'es où?");
-        delay(100);
-    }
-    while (!digitalRead(D10))
-    {
-        Serial.println("ok t la");
-        delay(100);
-    }
-    right = AccelStepper(AccelStepper::DRIVER, D3, D2);
-    left = AccelStepper(AccelStepper::DRIVER, D1, D0);
-    left.setAcceleration(500);
-    left.setMaxSpeed(1000);
-    right.setMaxSpeed(1000);
-    right.setAcceleration(500);
-
-    digitalWrite(D8, LOW);
-    delay(1000);
-    left.move(100000);
-    right.move(100000);
-    // delay(2000);
-    Serial.println("Start");
-}
-void loop()
-{
-    left.run();
-    right.run();
-    // Serial.println("helloow");
-    // delay(100);
-}
-#else
 #include <lidar.h>
 #include <Robotmove.h>
 #include <PCF8574.h>
 #include <vector>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+
+// CODE NECESSAIRE AVANT DECLARATION DE STRATEGIE
+enum struct atype{FORWARD,BACKWARD,TURN,TURNTO,MOVETO,FERMER_AIMANTS,OUVRIR_AIMANTS,MONTER_ACTIONNEUR,DESCENDRE_ACTIONNEUR,MILLIEU_ACTIONNEUR,OUVRIR_BRAS,FERMER_BRAS,ACTIVER_POMPE,DESACTIVER_POMPE,WAIT};
+typedef atype A;
+struct etape{atype action;int distance;RobotMove::Coord coordonnees;double angle;int vitesse;int time;};
+constexpr int DEFAULT_SPEED=8000;
+etape FORWARD(int d,int v=DEFAULT_SPEED){return etape{.action=A::FORWARD,.distance=d,.vitesse=v};}
+etape BACKWARD(int d,int v=DEFAULT_SPEED){return etape{.action=A::BACKWARD,.distance=d,.vitesse=v};}
+etape TURN(double a,int v=DEFAULT_SPEED){return etape{.action=A::TURN, .angle=a,.vitesse=v};}
+etape TURNTO(double a,int v=DEFAULT_SPEED){return etape{.action=A::TURNTO, .angle=a,.vitesse=v};}
+etape MOVETO(RobotMove::Coord c,int v=DEFAULT_SPEED){return etape{.action=A::MOVETO, .coordonnees=c,.vitesse=v};}
+etape FERMER_AIMANTS(){return etape{.action=A::FERMER_AIMANTS};}
+etape OUVRIR_AIMANTS(){return etape{.action=A::OUVRIR_AIMANTS};}
+etape MONTER_ACTIONNEUR(){return etape{.action=A::MONTER_ACTIONNEUR};}
+etape DESCENDRE_ACTIONNEUR(){return etape{.action=A::DESCENDRE_ACTIONNEUR};}
+etape MILLIEU_ACTIONNEUR(){return etape{.action=A::MILLIEU_ACTIONNEUR};}
+etape OUVRIR_BRAS(){return etape{.action=A::OUVRIR_BRAS};}
+etape FERMER_BRAS(){return etape{.action=A::FERMER_BRAS};}
+etape ACTIVER_POMPE(){return etape{.action=A::ACTIVER_POMPE};}
+etape DESACTIVER_POMPE(){return etape{.action=A::DESACTIVER_POMPE};}
+etape WAIT(int time){return etape{.action=A::WAIT,.time=time};}
+typedef std::vector<etape> strategie;
+
+// DÉFINITION DE LA STRATÉGIE
+
+/// @brief La stratégie numéro un du robot
+strategie stratdemo = strategie{
+    MILLIEU_ACTIONNEUR(),
+    WAIT(2000),
+    DESCENDRE_ACTIONNEUR(),
+    WAIT(1000),
+    OUVRIR_AIMANTS(),
+    WAIT(2000),
+    FERMER_AIMANTS(),
+    WAIT(1000),
+    ACTIVER_POMPE(),
+    WAIT(2000),
+    DESACTIVER_POMPE(),
+};
+
+/// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
+strategie strat = stratdemo;
+
+// DEBUT DU CODE PUR ET DUR
 
 PCF8574 pcf(0x20);
 Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
@@ -79,115 +74,11 @@ enum struct step_state
 
 step_state etat_action = step_state::IDLE;
 
-enum struct atype
-{
-    FORWARD,
-    BACKWARD,
-    TURN,
-    TURNTO,
-    MOVETO,
-    FERMER_AIMANTS,
-    OUVRIR_AIMANTS,
-    MONTER_ACTIONNEUR,
-    DESCENDRE_ACTIONNEUR,
-    MILLIEU_ACTIONNEUR,
-    OUVRIR_BRAS,
-    FERMER_BRAS,
-    ACTIVER_POMPE,
-    DESACTIVER_POMPE,
-    WAIT
-};
-
-struct etape
-{
-    atype action;
-    int distance;
-    RobotMove::Coord coordonnees;
-    double angle;
-    int vitesse;
-    int time;
-};
 
 typedef std::vector<etape> strategie;
 
 
-typedef atype A;
-constexpr int DEFAULT_SPEED=8000;
-/// @brief Créer une étape pour faire avancer le robot
-/// @param d la distance en cm
-/// @param v la vitesse en step/s (par défault à 1000)
-/// @return l'étape nouvellement créée
-etape FORWARD(int d,int v=DEFAULT_SPEED){
-    return etape{.action=A::FORWARD,.distance=d,.vitesse=v};
-}
-/// @brief Créer une étape pour faire reculer le robot
-/// @param d la distance en cm 
-/// @param v la vitesse en step/s (par défault à 1000)
-/// @return l'étape nouvellement créée
-etape BACKWARD(int d,int v=DEFAULT_SPEED){
-    return etape{.action=A::BACKWARD,.distance=d,.vitesse=v};
-}
-/// @brief Créer une étape pour faire tourner le robot
-/// @param a l'angle en degré
-/// @param v la vitesse en step/s (par défault à 1000)
-/// @return l'étape nouvellement créée
-etape TURN(double a,int v=DEFAULT_SPEED){
-    return etape{.action=A::TURN, .angle=a,.vitesse=v};
-}
-/// @brief Créer une étape pour faire tourner le robot vers un angle précis
-/// @param a l'angle de destination en degré
-/// @param v la vitesse en step/s (par défault à 1000)
-/// @return l'étape nouvellement créée
-etape TURNTO(double a,int v=DEFAULT_SPEED){
-    return etape{.action=A::TURNTO, .angle=a,.vitesse=v};
-}
-/// @brief Créer une étape pour faire déplacer le robot vers un point précis
-/// @param c la coordonnée avec x et y en cm et a en degrés
-/// @param v la vitesse en step/s (par défault à 1000)
-/// @return l'étape nouvellement créée
-etape MOVETO(RobotMove::Coord c,int v=DEFAULT_SPEED){
-    return etape{.action=A::MOVETO, .coordonnees=c,.vitesse=v};
-}
-/// @brief FERMER aimants
-/// @return étape
-etape FERMER_AIMANTS(){
-    return etape{.action=A::FERMER_AIMANTS};
-}
-/// @brief OUVRIR AIMANTS
-/// @return étape
-etape OUVRIR_AIMANTS(){
-    return etape{.action=A::OUVRIR_AIMANTS};
-}
-/// @brief MONTER actionneur
-/// @return étape
-etape MONTER_ACTIONNEUR(){
-    return etape{.action=A::MONTER_ACTIONNEUR};
-}
-/// @brief DESCENDRE actionneur
-/// @return étape
-etape DESCENDRE_ACTIONNEUR(){
-    return etape{.action=A::DESCENDRE_ACTIONNEUR};
-}
-/// @brief MILLIEU actionneur
-/// @return étape
-etape MILLIEU_ACTIONNEUR(){
-    return etape{.action=A::MILLIEU_ACTIONNEUR};
-}
-etape OUVRIR_BRAS(){
-    return etape{.action=A::OUVRIR_BRAS};
-}
-etape FERMER_BRAS(){
-    return etape{.action=A::FERMER_BRAS};
-}
-etape ACTIVER_POMPE(){
-    return etape{.action=A::ACTIVER_POMPE};
-}
-etape DESACTIVER_POMPE(){
-    return etape{.action=A::DESACTIVER_POMPE};
-}
-etape WAIT(int time){
-    return etape{.action=A::WAIT,.time=time};
-}
+
 
 
 int angleToPulse(int);
@@ -237,25 +128,7 @@ int angleToPulse(int angle)
 }
 
 void debugMode();
-// JUMP HERE TO SET STRATEGIE:
-// STRATDEF
-/// @brief La stratégie numéro un du robot
-strategie stratdemo = strategie{
-    MILLIEU_ACTIONNEUR(),
-    WAIT(2000),
-    DESCENDRE_ACTIONNEUR(),
-    WAIT(1000),
-    OUVRIR_AIMANTS(),
-    WAIT(2000),
-    FERMER_AIMANTS(),
-    WAIT(1000),
-    ACTIVER_POMPE(),
-    WAIT(2000),
-    DESACTIVER_POMPE(),
-};
 
-/// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
-strategie strat = stratdemo;
 int etapeencour = -1;
 /// @brief Appeler la fonction correspondant à une étape
 /// @param step l'étape actuelle
@@ -508,4 +381,3 @@ void debugMode(){
     }
     delay(250);
 }
-#endif
