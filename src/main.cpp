@@ -1,5 +1,54 @@
 // TO SET STRATEGIE SEARCH STRATDEF
 #include <Arduino.h>
+#define HELLOWORLD 99
+#if HELLOWORLD == 0
+#include <AccelStepper.h>
+AccelStepper left, right;
+void setup()
+{
+    pinMode(D8, OUTPUT);
+    pinMode(D10, INPUT_PULLUP);
+    Serial.begin(115200);
+    delay(3000);
+    Serial.println("helloworld how are you??");
+    while (!digitalRead(D10))
+    {
+        Serial.println("what the fuck?");
+        delay(100);
+    }
+    // fonction de pre_init
+    while (digitalRead(D10))
+    {
+        Serial.println("Mais t'es pas là mais t'es où?");
+        delay(100);
+    }
+    while (!digitalRead(D10))
+    {
+        Serial.println("ok t la");
+        delay(100);
+    }
+    right = AccelStepper(AccelStepper::DRIVER, D3, D2);
+    left = AccelStepper(AccelStepper::DRIVER, D1, D0);
+    left.setAcceleration(500);
+    left.setMaxSpeed(1000);
+    right.setMaxSpeed(1000);
+    right.setAcceleration(500);
+
+    digitalWrite(D8, LOW);
+    delay(1000);
+    left.move(100000);
+    right.move(100000);
+    // delay(2000);
+    Serial.println("Start");
+}
+void loop()
+{
+    left.run();
+    right.run();
+    // Serial.println("helloow");
+    // delay(100);
+}
+#else
 #include <lidar.h>
 #include <Robotmove.h>
 #include <PCF8574.h>
@@ -144,8 +193,8 @@ etape WAIT(int time){
 int angleToPulse(int);
 void fermer_aimants()
 {
-    pcacard.setPWM(13,0,angleToPulse(0));
-    pcacard.setPWM(14,0,angleToPulse(90));
+    pcacard.setPWM(13,0,angleToPulse(70));
+    pcacard.setPWM(14,0,angleToPulse(70));
     delay(1000);
 }
 void ouvrir_aimants(){
@@ -176,10 +225,10 @@ void fermer_bras(){
     delay(1000);
 }
 void activer_pompe(){
-    pcf.digitalWrite(P4,HIGH);
+    pcf.digitalWrite(P5,HIGH);
 }
 void desactiver_pompe(){
-    pcf.digitalWrite(P4,LOW);
+    pcf.digitalWrite(P5,LOW);
 }
 int angleToPulse(int angle)
 {
@@ -191,22 +240,22 @@ void debugMode();
 // JUMP HERE TO SET STRATEGIE:
 // STRATDEF
 /// @brief La stratégie numéro un du robot
-strategie stratun = strategie{
-    // FORWARD(40*1000),
-    // DESCENDRE_ACTIONNEUR(),
-    // OUVRIR_AIMANTS(),
-    // FORWARD(10),
-    // MILLIEU_ACTIONNEUR(),
-    // BACKWARD(10),
-    // TURN(180),
-    // FORWARD(30),
-    // DESCENDRE_ACTIONNEUR(),
-    // FERMER_AIMANTS()
+strategie stratdemo = strategie{
+    MILLIEU_ACTIONNEUR(),
+    WAIT(2000),
+    DESCENDRE_ACTIONNEUR(),
+    WAIT(1000),
+    OUVRIR_AIMANTS(),
+    WAIT(2000),
+    FERMER_AIMANTS(),
+    WAIT(1000),
+    ACTIVER_POMPE(),
+    WAIT(2000),
+    DESACTIVER_POMPE(),
 };
 
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
-strategie strat = stratun;
-
+strategie strat = stratdemo;
 int etapeencour = -1;
 /// @brief Appeler la fonction correspondant à une étape
 /// @param step l'étape actuelle
@@ -295,6 +344,7 @@ void setup()
     pcf.pinMode(P1,INPUT);
     pcf.pinMode(P2,INPUT);
     pcf.pinMode(P3,INPUT);
+    pcf.pinMode(P4,OUTPUT);
     delay(1000);
     pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
     initLidar();
@@ -324,10 +374,10 @@ bool isPaused=false;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
-    if(debugmode){
-        debugMode();
-        return;
-    }
+    // if(debugmode){
+    //     debugMode();
+    //     return;
+    // }
     if (etat_a != etat::MATCH)
     {
         if (etat_a == etat::FIN)
@@ -380,17 +430,17 @@ void loop()
     }
     else if (etat_action == step_state::IDLE)
     {
-        if (etapeencour+1== stratun.size())
+        if (etapeencour+1== strat.size())
         { // etapesuivante =etapeencours + 1; par rapport à size() = etapesuivante -1; donc = etapeencour+1-1
             debugPrintln("hello fucking world ?");
             debugPrintln(etapeencour);
-            debugPrintln(stratun.size());
+            debugPrintln(strat.size());
             debugPrintln("ok");
             delay(250);
             etapeencour++;
             return;
         }
-        if(etapeencour+1>stratun.size()){
+        if(etapeencour+1>strat.size()){
             return;
         }
         showed_step = false;
@@ -458,3 +508,4 @@ void debugMode(){
     }
     delay(250);
 }
+#endif
