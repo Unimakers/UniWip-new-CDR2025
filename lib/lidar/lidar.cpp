@@ -75,7 +75,7 @@ void checkAndSendObstacle(bool a){
 }
 
 
-
+int sumPoints = 0;
 // FONCTION COEUR 0 (COUEUR LIDAR)
 void get_point_lidar()
 {
@@ -83,6 +83,7 @@ void get_point_lidar()
 
     }else{
         lidarHasObstacle=false;
+        sumPoints=0;
     }
     // lidarHasObstacle=false;
     if (IS_OK(lidar.waitPoint(100)))
@@ -106,7 +107,14 @@ void get_point_lidar()
                     // debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
                     // debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
                     // supobstacleval=true;
-                    lidarHasObstacle=true;
+                    if(millis()-cooldownstarted<1000){
+                        sumPoints++;
+                        if(sumPoints>=15){
+                            lidarHasObstacle=true;
+                        }
+                    }else{
+                        sumPoints=1;
+                    }
                     cooldownstarted=millis();
                 }
                 else{
