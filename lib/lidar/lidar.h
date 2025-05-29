@@ -17,4 +17,4 @@ double angleInAngleRange(double);
 void checkAndSendObstacle(bool);
 void initLidar();
 void sendCurrentAngle(DirectionVector);
-bool getLidarStatus();
+bool* getLidarStatus();

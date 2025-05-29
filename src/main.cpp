@@ -2,13 +2,11 @@
 #include <Arduino.h>
 #include <lidar.h>
 #include <Robotmove.h>
-#include <PCF8574.h>
+#include <Adafruit_PCF8574.h>
 #include <vector>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
-
-constexpr bool pamimode = false;
-
+#include <constante.h>
 // CODE NECESSAIRE AVANT DECLARATION DE STRATEGIE
 enum struct atype
 {
@@ -26,21 +24,29 @@ enum struct atype
     FERMER_BRAS,
     ACTIVER_POMPE,
     DESACTIVER_POMPE,
-    WAIT
+    WAIT,
+    MONTER_BANDEROLE
 };
 typedef atype A;
 struct etape
 {
     atype action;
-    int distance;
+    double distance;
     RobotMove::Coord coordonnees;
     double angle;
     int vitesse;
     int time;
 };
-constexpr int DEFAULT_SPEED = 8000;
-etape FORWARD(int d, int v = DEFAULT_SPEED) { return etape{.action = A::FORWARD, .distance = d, .vitesse = v}; }
-etape BACKWARD(int d, int v = DEFAULT_SPEED) { return etape{.action = A::BACKWARD, .distance = d, .vitesse = v}; }
+constexpr int
+    DEFAULT_SPEED =
+#if PAMIMODE == 1
+        1000
+#else
+        8000
+#endif
+    ;
+etape FORWARD(double d, int v = DEFAULT_SPEED) { return etape{.action = A::FORWARD, .distance = d, .vitesse = v}; }
+etape BACKWARD(double d, int v = DEFAULT_SPEED) { return etape{.action = A::BACKWARD, .distance = d, .vitesse = v}; }
 etape TURN(double a, int v = DEFAULT_SPEED) { return etape{.action = A::TURN, .angle = a, .vitesse = v}; }
 etape TURNTO(double a, int v = DEFAULT_SPEED) { return etape{.action = A::TURNTO, .angle = a, .vitesse = v}; }
 etape MOVETO(RobotMove::Coord c, int v = DEFAULT_SPEED) { return etape{.action = A::MOVETO, .coordonnees = c, .vitesse = v}; }
@@ -53,9 +59,11 @@ etape OUVRIR_BRAS() { return etape{.action = A::OUVRIR_BRAS}; }
 etape FERMER_BRAS() { return etape{.action = A::FERMER_BRAS}; }
 etape ACTIVER_POMPE() { return etape{.action = A::ACTIVER_POMPE}; }
 etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
+etape MONTER_BANDEROLE() { return etape{.action = A::MONTER_BANDEROLE}; }
 etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
 typedef std::vector<etape> strategie;
-PCF8574 pcf(0x20);
+Adafruit_PCF8574 pcf;
+
 
 // DÉFINITION DE LA STRATÉGIE
 
@@ -74,7 +82,13 @@ strategie stratdemoservo = strategie{
     // FERMER_BRAS(),
 };
 strategie stratun = strategie{
-    FORWARD(40*1000),
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FERMER_AIMANTS(),
+    MILLIEU_ACTIONNEUR(),
+    WAIT(1000),
+    DESCENDRE_ACTIONNEUR(),
+    FORWARD(40),
     // DESCENDRE_ACTIONNEUR(),
     // OUVRIR_AIMANTS(),
     // FORWARD(10),
@@ -84,22 +98,135 @@ strategie stratun = strategie{
     // FORWARD(30),
     // DESCENDRE_ACTIONNEUR(),
     // FERMER_AIMANTS()
-    };
+};
+// BETWEEN BACK AND WHEEL CENTER = 13.25cm
+// BETWEEN BACK AND ACTIONNEUR AIMANT = 21cm
+strategie noforfait = strategie{
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FERMER_AIMANTS(),
+    MILLIEU_ACTIONNEUR(),
+    WAIT(1000),
+    DESCENDRE_ACTIONNEUR(),
+    FORWARD(40),
+    BACKWARD(40)};
+strategie stratapointblue = strategie{
+    FORWARD(40 - 13),
+    TURN(90),
+    FORWARD(12.5),
+    TURN(-90),
+    FORWARD(40),
+    DESCENDRE_ACTIONNEUR(),
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FORWARD(20),
+    MILLIEU_ACTIONNEUR(),
+    BACKWARD(20),
+    TURN(-90),
+    FORWARD(12.5),
+    TURN(-90),
+    FORWARD(60),
+    DESCENDRE_ACTIONNEUR(),
+    FERMER_AIMANTS(),
+    BACKWARD(10),
+    TURN(-90),
+    FORWARD(12.5),
+    TURN(-90),
+    FORWARD(90),
+    TURN(90),
+    FORWARD(60),
+    TURN(-90),
+    FORWARD(20),
+    TURN(90),
+    FORWARD(12.5),
+    TURN(-90),
+    FORWARD(60)
 
+};
+strategie stratapointyellow = strategie{
+    BACKWARD(2),
+    FORWARD(40 - 13),
+    TURN(-90),
+    FORWARD(12.5),
+    TURN(90),
+    FORWARD(40),
+    DESCENDRE_ACTIONNEUR(),
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FORWARD(20),
+    MILLIEU_ACTIONNEUR(),
+    BACKWARD(20),
+    TURN(90),
+    FORWARD(12.5),
+    TURN(90),
+    FORWARD(60),
+    DESCENDRE_ACTIONNEUR(),
+    FERMER_AIMANTS(),
+    BACKWARD(10),
+    TURN(90),
+    FORWARD(12.5),
+    TURN(90),
+    FORWARD(90),
+    TURN(-90),
+    FORWARD(60),
+    TURN(90),
+    FORWARD(20),
+    TURN(-90),
+    FORWARD(12.5),
+    TURN(90),
+    FORWARD(60)
+
+};
+strategie noforfait2 = strategie{
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FERMER_AIMANTS(),
+    MILLIEU_ACTIONNEUR(),
+    WAIT(1000),
+    DESCENDRE_ACTIONNEUR(),
+    BACKWARD(2),
+    FORWARD(30 - 13),
+    TURN(90),
+    FORWARD(10),
+    TURN(-90),
+    FORWARD(90),
+    TURN(90),
+    FORWARD(60),
+    TURN(-90),
+    FORWARD(20),
+    TURN(90),
+    FORWARD(10),
+    TURN(-90),
+    FORWARD(60)};
+strategie pamistratblue = strategie{
+    // BACKWARD(2),
+    FORWARD(120),
+    TURN(-90),
+    FORWARD(20),
+    TURN(45),
+    FORWARD(10,500)
+};
+strategie pamistratyellow = strategie{
+    // BACKWARD(2),
+    FORWARD(120),
+    TURN(90),
+    FORWARD(20)};
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
-strategie strat = stratun;
+strategie strat = stratdemoservo;
 void choixStrategie()
 {
     // while (1)
     // {
-    // en théorie code 111 réservé pour debugMode donc préferable de ne pas utiliser
+    // // en théorie code 111 réservé pour debugMode donc préferable de ne pas utiliser
     // int code = 0;
-    // if (!pcf.digitalRead(P3))
+
+    // if (!pcf.digitalRead(3))
     //     code += 1;
-    // if (!pcf.digitalRead(P2))
+    // if (!pcf.digitalRead(2))
     //     code += 10;
-    // if (!pcf.digitalRead(P1))
+    // if (!pcf.digitalRead(1))
     //     code += 100;
+    // if(!pcf.digitalRead(0))code+=1000;
     // debugPrintln(((std::string) "debugMode: code actuel en écriture: " + std::to_string(code)).c_str());
     // if (code == 1)
     // {
@@ -109,6 +236,29 @@ void choixStrategie()
     // }
     // delay(1000);
     // }
+    if (pamimode)
+    {
+        if (!pcf.digitalRead(1))
+        { // YELLOW
+            strat = pamistratyellow;
+        }
+        else
+        {
+            // BLUE
+            strat = pamistratblue;
+        }
+    }
+    else
+    {
+        if (!pcf.digitalRead(1))
+        { // YELLOW
+            strat = stratapointblue;
+        }
+        else
+        {
+            strat = stratapointyellow;
+        }
+    }
 }
 
 // DEBUT DU CODE PUR ET DUR
@@ -142,7 +292,7 @@ void fermer_aimants()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(13, 0, angleToPulse(70));
+    pcacard.setPWM(13, 0, angleToPulse(20));
     pcacard.setPWM(14, 0, angleToPulse(70));
     delay(1000);
 }
@@ -153,6 +303,12 @@ void ouvrir_aimants()
     pcacard.setPWM(13, 0, angleToPulse(45));
     pcacard.setPWM(14, 0, angleToPulse(45));
     delay(1000);
+}
+void monter_banderole()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(0, 0, angleToPulse(60));
 }
 void monter_actionneur()
 {
@@ -195,13 +351,13 @@ void activer_pompe()
 {
     if (pamimode)
         return;
-    pcf.digitalWrite(P5, HIGH);
+    pcf.digitalWrite(5, HIGH);
 }
 void desactiver_pompe()
 {
     if (pamimode)
         return;
-    pcf.digitalWrite(P5, LOW);
+    pcf.digitalWrite(5, LOW);
 }
 int angleToPulse(int angle)
 {
@@ -279,6 +435,9 @@ void actioncall(etape step)
     case atype::WAIT:
         return delay(step.time);
         break;
+    case atype::MONTER_BANDEROLE:
+        return monter_banderole();
+        break;
     default:
         break;
     }
@@ -291,23 +450,141 @@ bool actionfini()
     return robot.reachedtarget();
 }
 
+void initialisation_et_banderole()
+{
+    if(pamimode)return;
+    strategie init_and_banderole = strategie{
+        MONTER_BANDEROLE(),
+        WAIT(2000),
+        FORWARD(20),
+        BACKWARD(3.5),
+        MONTER_ACTIONNEUR(),
+        BACKWARD(20 - 3.5),
+        FERMER_AIMANTS(),
+        TURN(180),
+        BACKWARD(10),
+    };
+    step_state init_sub_state = step_state::IDLE;
+    while (1)
+    {
+        if (init_sub_state == step_state::RUNNING and actionfini())
+        {
+            init_sub_state = step_state::IDLE;
+            debugPrintln("end");
+            // debugPrintln("running one !");
+        }
+        else if (init_sub_state == step_state::RUNNING)
+        {
+            bool *isStopped;
+            bool pppp = false;
+            isStopped = &pppp;
+            robot.run(isStopped);
+        }
+        else if (init_sub_state == step_state::IDLE)
+        {
+            if (etapeencour + 1 == init_and_banderole.size())
+            {
+                etapeencour++;
+                return;
+            }
+            if (etapeencour + 1 > init_and_banderole.size())
+            {
+                return;
+            }
+            etapeencour++;
+            actioncall(init_and_banderole[etapeencour]);
+            init_sub_state = step_state::RUNNING;
+            debugPrint("running three ! at step");
+            debugPrintln(etapeencour);
+            delay(100);
+        }
+        else
+        {
+            init_sub_state = step_state::IDLE;
+            debugPrintln("running four !");
+            delay(200);
+        }
+    }
+}
+
+
+void initialisation_table()
+{
+    if(pamimode)return;
+    strategie init_table = strategie{
+        BACKWARD(5),
+        FORWARD(30-13),
+        TURN(-90),
+        BACKWARD(122),
+        FORWARD(120+13),
+        TURN(-90),
+        FORWARD(20)
+    };
+    step_state init_sub_state = step_state::IDLE;
+    while (1)
+    {
+        if (init_sub_state == step_state::RUNNING and actionfini())
+        {
+            init_sub_state = step_state::IDLE;
+            debugPrintln("end");
+            // debugPrintln("running one !");
+        }
+        else if (init_sub_state == step_state::RUNNING)
+        {
+            bool *isStopped;
+            bool pppp = false;
+            isStopped = &pppp;
+            robot.run(isStopped);
+        }
+        else if (init_sub_state == step_state::IDLE)
+        {
+            if (etapeencour + 1 == init_table.size())
+            {
+                etapeencour++;
+                return;
+            }
+            if (etapeencour + 1 > init_table.size())
+            {
+                return;
+            }
+            etapeencour++;
+            actioncall(init_table[etapeencour]);
+            init_sub_state = step_state::RUNNING;
+            debugPrint("running three ! at step");
+            debugPrintln(etapeencour);
+            delay(100);
+        }
+        else
+        {
+            init_sub_state = step_state::IDLE;
+            debugPrintln("running four !");
+            delay(200);
+        }
+    }
+}
+
 bool debugmode = false;
 
 /// @brief fonction d'initialisation
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(9600);
     pcacard.begin();
     pcacard.setPWMFreq(60);
-    pcf.begin();
-    pcf.pinMode(P0, INPUT);
-    pcf.pinMode(P1, INPUT);
-    pcf.pinMode(P2, INPUT);
-    pcf.pinMode(P3, INPUT);
-    pcf.pinMode(P4, OUTPUT);
+     if (!pcf.begin(0x20, &Wire)) {
+    Serial.println("Couldn't find PCF8574");
+    while (1);
+  }
+    // pcf.begin();
+    pcf.pinMode(0, INPUT);
+    pcf.pinMode(1, INPUT);
+    pcf.pinMode(2, INPUT);
+    pcf.pinMode(3, INPUT);
+    pcf.pinMode(4, OUTPUT);
+    pinMode(D8, OUTPUT);
+    digitalWrite(D8, LOW);
     delay(1000);
     pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
-    initLidar();
     while (!digitalRead(Pin::IHM::TIRETTE))
     {
         debugPrintln("what the fuck?");
@@ -316,23 +593,28 @@ void setup()
     // fonction de pre_init
     while (digitalRead(Pin::IHM::TIRETTE))
     {
-        debugPrintln("Mais t'es pas là mais t'es où?");
+        // debugPrintln("Mais t'es pas là mais t'es où?");
         delay(100);
     }
-    if (!pcf.digitalRead(P1) && !pcf.digitalRead(P2) && !pcf.digitalRead(P3))
+    if (!pcf.digitalRead(1) && !pcf.digitalRead(2) && !pcf.digitalRead(3))
     {
         // enter debug mode
         debugmode = true;
     }
     choixStrategie();
-    pinMode(D8, OUTPUT);
-    digitalWrite(D8, LOW);
+    millieu_actionneur();
+    ouvrir_aimants();
+    initialisation_table();
+    // delay(3000);
+    // monter_banderole();
     etat_a = etat::INITALISATION;
     delay(1000);
 }
 
 bool showed_step = false;
 bool isPaused = false;
+long lastPamiDetectCheck = 0;
+bool lastPamiDetectValue = false;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -350,37 +632,41 @@ void loop()
         {
 
             debugPrintln("Jchuis là");
+            // debugPrintln(hc.dist());
             // delay(100);
         }
         else
         {
             etat_a = etat::MATCH;
             debugPrintln("fin setup");
+            initialisation_et_banderole();
+            initLidar();
+            delay(5000);
             // delay(100);
         }
         delay(100);
         return;
     }
-    if (getLidarStatus())
-    {
-        // debugPrint("paused by lidar at ");debugPrintln(millis());
-        // delay(200);
-        if (!isPaused)
-        {
-            robot.stop();
-            isPaused = true;
-        }
-        robot.run();
-        return;
-    }
-    else
-    {
-        if (isPaused)
-        {
-            robot.resume();
-            isPaused = false;
-        }
-    }
+    // if (getLidarStatus())
+    // {
+    //     debugPrint("paused by lidar at ");
+    //     // delay(200);
+    //     if (!isPaused)
+    //     {
+    //         robot.stop();
+    //         isPaused = true;
+    //     }
+    //     robot.run(getLidarStatus());
+    //     return;
+    // }
+    // else
+    // {
+    //     if (isPaused)
+    //     {
+    //         robot.resume();
+    //         isPaused = false;
+    //     }
+    // }
     if (etat_action == step_state::RUNNING and actionfini())
     {
         etat_action = step_state::IDLE;
@@ -395,7 +681,9 @@ void loop()
             delay(100);
             showed_step = true;
         }
-        robot.run();
+        bool *isStopped;
+        isStopped = getLidarStatus();
+        robot.run(isStopped);
         // robot.debugPosition();
         // debugPrintln("running two !");
         // delay(100);
@@ -434,28 +722,28 @@ void loop()
 
 void debugMode()
 {
-    // if(!pcf.digitalRead(P0)){
+    // if(!pcf.digitalRead(0)){
     //     debugPrint("helloP0");debugPrintln(millis());
     // }
-    // if(!pcf.digitalRead(P1)){
+    // if(!pcf.digitalRead(1)){
     //     debugPrint("helloP1");debugPrintln(millis());
     // }
-    // if(!pcf.digitalRead(P2)){
+    // if(!pcf.digitalRead(2)){
     //     debugPrint("helloP2");debugPrintln(millis());
     // }
-    // if(!pcf.digitalRead(P3)){
+    // if(!pcf.digitalRead(3)){
     //     debugPrint("helloP3");debugPrintln(millis());
     // }
     // delay(500);
     int code = 0;
-    if (!pcf.digitalRead(P3))
+    if (!pcf.digitalRead(3))
         code += 1;
-    if (!pcf.digitalRead(P2))
+    if (!pcf.digitalRead(2))
         code += 10;
-    if (!pcf.digitalRead(P1))
+    if (!pcf.digitalRead(1))
         code += 100;
     debugPrintln(((std::string) "debugMode: code actuel en écriture: " + std::to_string(code)).c_str());
-    if (!pcf.digitalRead(P0))
+    if (!pcf.digitalRead(0))
     {
         // CODE 100 = MONTER
         if (code == 100)
@@ -489,5 +777,5 @@ void debugMode()
         }
         debugPrintln("activation code");
     }
-    delay(250);
+    // delay(250);
 }

@@ -1,13 +1,14 @@
 //UniLidar by Aurélien
 #include <lidar.h>
 RPLidar lidar;
-HardwareSerial lidarSerial(1);
+// HardwareSerial lidarSerial(1);
 // HardwareSerial lidarSerial(1);
 TaskHandle_t Task0;
 
-int DIST_OBSTACLE = 350;
+float DIST_OBSTACLE = 350.0;
+float MIN_DIST_OBSTACLE = 100.0;
 int QUALITY = 14;
-int MEAN_ALLOWED = 2;
+// int MEAN_ALLOWED = 2;
 
 static portMUX_TYPE my_spinlock = portMUX_INITIALIZER_UNLOCKED;
 
@@ -78,29 +79,38 @@ void checkAndSendObstacle(bool a){
 // FONCTION COEUR 0 (COUEUR LIDAR)
 void get_point_lidar()
 {
-    if (IS_OK(lidar.waitPoint()))
+    if(lidarHasObstacle && (millis()-cooldownstarted)<3000){
+
+    }else{
+        lidarHasObstacle=false;
+    }
+    // lidarHasObstacle=false;
+    if (IS_OK(lidar.waitPoint(100)))
     {
-        bool supobstacleval = false;
+        // bool supobstacleval = false;
         mesure.angle = lidar.getCurrentPoint().angle;
+
         // debugPrintln(((std::string)("a"+std::to_string(mesure.angle))).c_str());
         if (angleInAngleRange(mesure.angle))
         {
             mesure.distance = lidar.getCurrentPoint().distance; // distance value in mm unit
             mesure.quality = lidar.getCurrentPoint().quality;
             // debugPrintln(((std::string)("q"+std::to_string(mesure.quality))).c_str());
-            if (mesure.quality > QUALITY)
+            if (mesure.quality >= QUALITY)
             {
-                // debugPrintln(((std::string)("d"+std::to_string(mesure.distance))).c_str());
                 if (obstacle(mesure.distance))
                 {
-                    double xPoint = cos(mesure.angle) * mesure.distance;
-                    double yPoint = sin(mesure.angle) * mesure.distance;
+                    debugPrintln(((std::string)("d"+std::to_string(mesure.distance)+" "+std::to_string(mesure.angle))).c_str());
+                    // double xPoint = cos(mesure.angle) * mesure.distance;
+                    // double yPoint = sin(mesure.angle) * mesure.distance;
                     // debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
                     // debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
-                    supobstacleval=true;
+                    // supobstacleval=true;
+                    lidarHasObstacle=true;
+                    cooldownstarted=millis();
                 }
                 else{
-                    supobstacleval=false;
+                    // supobstacleval=false;
                 }
             }
             else
@@ -108,12 +118,11 @@ void get_point_lidar()
                 reset_point();
             }
         }
-        checkAndSendObstacle(supobstacleval);
-        delay(25);
+        // checkAndSendObstacle(supobstacleval);
     }
     else
     {
-        // analogWrite(Pin::IHM::LIDAR_PWM, 0); // stop the rplidar motor
+        analogWrite(Pin::IHM::LIDAR_PWM, 0); // stop the rplidar motor
         // debugPrintln("Lidar Stopped");
         // try to detect RPLIDAR...
         rplidar_response_device_info_t info;
@@ -122,7 +131,7 @@ void get_point_lidar()
             debugPrintln("Lidar found");
             // detected...
             lidar.startScan();
-            analogWrite(Pin::IHM::LIDAR_PWM, 150);
+            analogWrite(Pin::IHM::LIDAR_PWM, 160);
             delay(1000);
         }
         else
@@ -130,7 +139,24 @@ void get_point_lidar()
             debugPrintln("Lidar not found");
         }
     }
-    delay(25);
+    // delay(250);
+}
+#include <HCSR04.h>
+HCSR04 hc(D7, D6);
+void get_point_hcsr04(){
+    float dist = hc.dist();
+    debugPrintln(dist);
+    // debugPrintln(hc.dist());
+    if(dist>2 && dist<10){
+        lidarHasObstacle=true;
+        cooldownstarted=millis();
+    }
+    else if(lidarHasObstacle && (millis()-cooldownstarted)<3000){
+
+    }else{
+        lidarHasObstacle=false;
+    }
+    delay(100);
 }
 // FONCTION COEUR 0 (COUEUR LIDAR)
 void LidarTask(void *pvParameters)
@@ -142,13 +168,22 @@ void LidarTask(void *pvParameters)
     //     // lidarInitialized = true;
     //     // taskEXIT_CRITICAL(&my_spinlock);
     // }
-    lidar.begin(lidarSerial,RX, TX);
-    lidar.startScan();
-    for (;;)
-    {
-        // debugPrintln("hello");
-        get_point_lidar();
-        // delay(250);
+    if(pamimode){
+        for(;;){
+            get_point_hcsr04();
+        }
+    }
+    else{
+        pinMode(Pin::IHM::LIDAR_PWM, OUTPUT);
+        analogWrite(Pin::IHM::LIDAR_PWM, 160);
+        lidar.begin(Serial0);
+        lidar.startScan();
+        for (;;)
+        {
+            // debugPrintln("hello");
+            get_point_lidar();
+            
+        }
     }
 }
 
@@ -157,9 +192,7 @@ void initLidar()
 {
     // if (!lidarInitialized)
     // {
-    pinMode(Pin::IHM::LIDAR_PWM, OUTPUT);
-    analogWrite(Pin::IHM::LIDAR_PWM, 150);
-    xTaskCreatePinnedToCore(LidarTask, "Task0", 10000, NULL, 1, &Task0, 0);
+    xTaskCreatePinnedToCore(LidarTask, "Task0", 10000, NULL, 0, NULL, 0);
     // }
 }
 
@@ -172,16 +205,16 @@ void sendObstacleData(bool obstacleVal)
 }
 
 // FONCTION A EXECUTER COTE COEUR 1 (COEUR DE MOUVEMENT)
-bool getLidarStatus()
+bool* getLidarStatus()
 {
-    taskENTER_CRITICAL(&my_spinlock);
-    lidarHasObstacle = lidarHasObstaclePiped;
-    taskEXIT_CRITICAL(&my_spinlock);
-    if(lidarHasObstacle){
-        // debugPrint("lidar is here");
-        // debugPrintln(millis());
-    }
-    return lidarHasObstacle;
+    // taskENTER_CRITICAL(&my_spinlock);
+    // lidarHasObstacle = lidarHasObstaclePiped;
+    // taskEXIT_CRITICAL(&my_spinlock);
+    // if(lidarHasObstacle){
+    //     // debugPrint("lidar is here");
+    //     // debugPrintln(millis());
+    // }
+    return &lidarHasObstacle;
 }
 void sendCurrentAngle(DirectionVector v){
     double angle = calculateAngleFromDirection(v);
@@ -197,7 +230,7 @@ bool Angle_in_range_scare()
 // FONCTION COEUR 0 (COUEUR LIDAR)
 bool obstacle(float distance)
 {
-    if (distance < DIST_OBSTACLE && distance > 5)
+    if (distance < DIST_OBSTACLE && distance > MIN_DIST_OBSTACLE)
     {
         return true;
     }

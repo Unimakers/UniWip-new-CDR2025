@@ -21,6 +21,7 @@ protected:
     struct CurAction {int left, right;};
     CurAction currentaction;
     bool paused=false;
+    long starttime=0;
 public:
     struct Coord
     {
@@ -34,13 +35,12 @@ public:
         destination;
 
     RobotMove();
-    void run();
+    void run(bool *lidar);
     bool reachedtarget();
     void moveTo(Coord coord, int vitesse);
     bool moveToLoop();
-    void forward(int distance, int vitesse);
-    void backward(int distance, int vitesse);
-
+    void forward(double distance, int vitesse);
+    void backward(double distance, int vitesse);
     void turnTo(double angle, int vitesse);
     void turn(double angle, int vitesse);
     void setCoord(Coord startCoord);
