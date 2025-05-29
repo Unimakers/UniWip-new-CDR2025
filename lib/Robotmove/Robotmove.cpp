@@ -152,6 +152,12 @@ void RobotMove::stop()
         return;
     currentaction.left = stepper_gauche.distanceToGo();
     currentaction.right = stepper_droit.distanceToGo();
+    if(pamimode){
+        stepper_droit.setAcceleration(4000/2);
+        stepper_gauche.setAcceleration(4000/2);
+        stepper_droit.setMaxSpeed(4000);
+        stepper_gauche.setMaxSpeed(4000);
+    }
     stepper_droit.stop();
     stepper_gauche.stop();
     delay(20);

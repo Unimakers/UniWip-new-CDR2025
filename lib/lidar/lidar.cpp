@@ -147,7 +147,7 @@ void get_point_hcsr04(){
     float dist = hc.dist();
     debugPrintln(dist);
     // debugPrintln(hc.dist());
-    if(dist>2 && dist<10){
+    if(dist>3 && dist<8){
         lidarHasObstacle=true;
         cooldownstarted=millis();
     }

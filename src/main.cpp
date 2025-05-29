@@ -1,12 +1,44 @@
 // TO SET STRATEGIE SEARCH STRATDEF
 #include <Arduino.h>
+
+/*
+namespace Driver
+{
+    constexpr int
+        DIR_G = D0, // 13,
+        STEP_G = D1,
+        DIR_D = D2,
+        STEP_D = D3,
+        EN = D8;
+} // namespace Driver
+#include <AccelStepper.h>
+AccelStepper right;
+void setup()
+{
+    pinMode(D8, OUTPUT);
+    // pinMode(D10, INPUT_PULLUP);
+    right = AccelStepper(AccelStepper::DRIVER, D3, D2);
+    right.setMaxSpeed(8000);
+    right.setAcceleration(4000);
+
+    digitalWrite(D8, LOW);
+    delay(1000);
+    right.move(100000);
+}
+void loop()
+{
+    right.run();
+}
+
+*/
+
+#include <constante.h>
 #include <lidar.h>
 #include <Robotmove.h>
 #include <Adafruit_PCF8574.h>
 #include <vector>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <constante.h>
 // CODE NECESSAIRE AVANT DECLARATION DE STRATEGIE
 enum struct atype
 {
@@ -40,7 +72,7 @@ struct etape
 constexpr int
     DEFAULT_SPEED =
 #if PAMIMODE == 1
-        1000
+        2000
 #else
         8000
 #endif
@@ -111,71 +143,75 @@ strategie noforfait = strategie{
     FORWARD(40),
     BACKWARD(40)};
 strategie stratapointblue = strategie{
-    FORWARD(40 - 13),
-    TURN(90),
-    FORWARD(12.5),
-    TURN(-90),
-    FORWARD(40),
+    FORWARD(60 - 13),
+    TURN(45),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
-    WAIT(1000),
-    FORWARD(20),
+    FORWARD(sqrt(2)*10),
+    TURN(-45),
+    WAIT(500),
+    FORWARD(15),
     MILLIEU_ACTIONNEUR(),
-    BACKWARD(20),
-    TURN(-90),
-    FORWARD(12.5),
-    TURN(-90),
-    FORWARD(60),
+    BACKWARD(25),
+    TURN(-135),
+    FORWARD(sqrt(2)*10),
+    TURN(-45),
+    FORWARD(30),
     DESCENDRE_ACTIONNEUR(),
+    WAIT(500),
     FERMER_AIMANTS(),
-    BACKWARD(10),
+    WAIT(400),
+    BACKWARD(30),
+    // OUVRIR_AIMANTS(),
     TURN(-90),
-    FORWARD(12.5),
-    TURN(-90),
-    FORWARD(90),
+    FORWARD(42.5),
     TURN(90),
-    FORWARD(60),
-    TURN(-90),
-    FORWARD(20),
-    TURN(90),
-    FORWARD(12.5),
-    TURN(-90),
-    FORWARD(60)
+    FORWARD(40),
+    // FERMER_AIMANTS(),
+    // WAIT(1000),
+    BACKWARD(70),
+    MILLIEU_ACTIONNEUR(),
+    TURN(-135),
+    FORWARD(sqrt(pow(70,2)+pow(47.5,2))),
+    TURN(-45),
+    //ICI ON ATTENDRA LES PAMIS
+    FORWARD(15),
 
 };
 strategie stratapointyellow = strategie{
-    BACKWARD(2),
-    FORWARD(40 - 13),
-    TURN(-90),
-    FORWARD(12.5),
-    TURN(90),
-    FORWARD(40),
+    FORWARD(60 - 13),
+    TURN(-45),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
-    WAIT(1000),
-    FORWARD(20),
+    FORWARD(sqrt(2)*10),
+    TURN(45),
+    WAIT(500),
+    FORWARD(15),
     MILLIEU_ACTIONNEUR(),
-    BACKWARD(20),
-    TURN(90),
-    FORWARD(12.5),
-    TURN(90),
-    FORWARD(60),
+    BACKWARD(25),
+    TURN(135),
+    FORWARD(sqrt(2)*10),
+    TURN(45),
+    FORWARD(30),
     DESCENDRE_ACTIONNEUR(),
+    WAIT(500),
     FERMER_AIMANTS(),
-    BACKWARD(10),
+    WAIT(500),
+    BACKWARD(30),
+    // OUVRIR_AIMANTS(),
     TURN(90),
-    FORWARD(12.5),
-    TURN(90),
-    FORWARD(90),
+    FORWARD(42.5),
     TURN(-90),
-    FORWARD(60),
-    TURN(90),
-    FORWARD(20),
-    TURN(-90),
-    FORWARD(12.5),
-    TURN(90),
-    FORWARD(60)
-
+    FORWARD(40),
+    // FERMER_AIMANTS(),
+    // WAIT(1000),
+    BACKWARD(70),
+    MILLIEU_ACTIONNEUR(),
+    TURN(135),
+    FORWARD(sqrt(pow(70,2)+pow(47.5,2))),
+    TURN(45),
+    //ICI ON ATTENDRA LES PAMIS
+    FORWARD(15),
 };
 strategie noforfait2 = strategie{
     OUVRIR_AIMANTS(),
@@ -198,59 +234,66 @@ strategie noforfait2 = strategie{
     FORWARD(10),
     TURN(-90),
     FORWARD(60)};
-strategie pamistratblue = strategie{
+strategie pamisuperstarstratblue = strategie{
     // BACKWARD(2),
     FORWARD(120),
     TURN(-90),
-    FORWARD(20),
-    TURN(45),
-    FORWARD(10,500)
+    BACKWARD(5),
+    FORWARD(35),
+    // TURN(45),
+    // FORWARD(10,DEFAULT_SPEED/2)
 };
-strategie pamistratyellow = strategie{
+strategie pamisuperstarstratyellow = strategie{
     // BACKWARD(2),
     FORWARD(120),
     TURN(90),
-    FORWARD(20)};
+    BACKWARD(5),
+    FORWARD(35),
+    // TURN(-45),
+    // FORWARD(10,DEFAULT_SPEED/2)
+};
+strategie pamihomologationstratblue = strategie{
+    FORWARD(20,DEFAULT_SPEED/2),
+    TURN(45),
+    TURN(-90),
+    TURN(45),
+    FORWARD(20,DEFAULT_SPEED/2),
+};
+strategie pamihomologationstratyellow = strategie{
+    FORWARD(20,DEFAULT_SPEED/2),
+    TURN(-45),
+    TURN(90),
+    TURN(-45),
+    FORWARD(20,DEFAULT_SPEED/2),
+};
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
 strategie strat = stratdemoservo;
 void choixStrategie()
 {
-    // while (1)
-    // {
-    // // en théorie code 111 réservé pour debugMode donc préferable de ne pas utiliser
-    // int code = 0;
-
-    // if (!pcf.digitalRead(3))
-    //     code += 1;
-    // if (!pcf.digitalRead(2))
-    //     code += 10;
-    // if (!pcf.digitalRead(1))
-    //     code += 100;
-    // if(!pcf.digitalRead(0))code+=1000;
-    // debugPrintln(((std::string) "debugMode: code actuel en écriture: " + std::to_string(code)).c_str());
-    // if (code == 1)
-    // {
-    // }
-    // else if (code == 10)
-    // {
-    // }
-    // delay(1000);
-    // }
     if (pamimode)
     {
+        bool isSuperStar = true;
         if (!pcf.digitalRead(1))
         { // YELLOW
-            strat = pamistratyellow;
+            if(isSuperStar){
+            strat = pamisuperstarstratyellow;
+            }else{
+                strat=pamihomologationstratyellow;
+            }
         }
         else
         {
             // BLUE
-            strat = pamistratblue;
+            if(isSuperStar){
+            strat = pamisuperstarstratblue;
+            }else{
+                strat=pamihomologationstratblue;
+            }
         }
     }
     else
     {
-        if (!pcf.digitalRead(1))
+        if (pcf.digitalRead(1))
         { // YELLOW
             strat = stratapointblue;
         }
@@ -286,7 +329,7 @@ enum struct step_state
 step_state etat_action = step_state::IDLE;
 
 typedef std::vector<etape> strategie;
-
+constexpr int actionneur_ascenseur_offset=20;
 int angleToPulse(int);
 void fermer_aimants()
 {
@@ -294,7 +337,6 @@ void fermer_aimants()
         return;
     pcacard.setPWM(13, 0, angleToPulse(20));
     pcacard.setPWM(14, 0, angleToPulse(70));
-    delay(1000);
 }
 void ouvrir_aimants()
 {
@@ -302,34 +344,30 @@ void ouvrir_aimants()
         return;
     pcacard.setPWM(13, 0, angleToPulse(45));
     pcacard.setPWM(14, 0, angleToPulse(45));
-    delay(1000);
 }
 void monter_banderole()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(60));
+    pcacard.setPWM(0, 0, angleToPulse(63+actionneur_ascenseur_offset));
 }
 void monter_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(50));
-    delay(1000);
+    pcacard.setPWM(0, 0, angleToPulse(53+actionneur_ascenseur_offset));
 }
 void descendre_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(15));
-    delay(3000);
+    pcacard.setPWM(0, 0, angleToPulse(17+actionneur_ascenseur_offset));
 }
 void millieu_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(37));
-    delay(1000);
+    pcacard.setPWM(0, 0, angleToPulse(40+actionneur_ascenseur_offset));
 }
 void ouvrir_bras()
 {
@@ -337,7 +375,6 @@ void ouvrir_bras()
         return;
     pcacard.setPWM(11, 0, angleToPulse(90 - 0));
     pcacard.setPWM(12, 0, angleToPulse(0));
-    delay(1000);
 }
 void fermer_bras()
 {
@@ -345,7 +382,6 @@ void fermer_bras()
         return;
     pcacard.setPWM(11, 0, angleToPulse(90 - 45));
     pcacard.setPWM(12, 0, angleToPulse(45));
-    delay(1000);
 }
 void activer_pompe()
 {
@@ -450,17 +486,20 @@ bool actionfini()
     return robot.reachedtarget();
 }
 
+int etape_initbanderole=-1;
 void initialisation_et_banderole()
 {
     if(pamimode)return;
+    double distance_recul_banderole =3.5;
     strategie init_and_banderole = strategie{
         MONTER_BANDEROLE(),
         WAIT(2000),
-        FORWARD(20),
-        BACKWARD(3.5),
-        MONTER_ACTIONNEUR(),
-        BACKWARD(20 - 3.5),
-        FERMER_AIMANTS(),
+        FORWARD(22),
+        BACKWARD(distance_recul_banderole),
+        MILLIEU_ACTIONNEUR(),
+        WAIT(1000),
+        BACKWARD(20 - distance_recul_banderole),
+        // FERMER_AIMANTS(),
         TURN(180),
         BACKWARD(10),
     };
@@ -482,43 +521,39 @@ void initialisation_et_banderole()
         }
         else if (init_sub_state == step_state::IDLE)
         {
-            if (etapeencour + 1 == init_and_banderole.size())
+            if (etape_initbanderole + 1 == init_and_banderole.size())
             {
-                etapeencour++;
+                etape_initbanderole++;
                 return;
             }
-            if (etapeencour + 1 > init_and_banderole.size())
+            if (etape_initbanderole + 1 > init_and_banderole.size())
             {
                 return;
             }
-            etapeencour++;
-            actioncall(init_and_banderole[etapeencour]);
+            etape_initbanderole++;
+            actioncall(init_and_banderole[etape_initbanderole]);
             init_sub_state = step_state::RUNNING;
-            debugPrint("running three ! at step");
-            debugPrintln(etapeencour);
-            delay(100);
         }
         else
         {
             init_sub_state = step_state::IDLE;
-            debugPrintln("running four !");
-            delay(200);
         }
     }
 }
 
 
+int etape_inittable=-1;
 void initialisation_table()
 {
     if(pamimode)return;
+    bool isYellow = !pcf.digitalRead(1);
     strategie init_table = strategie{
-        BACKWARD(5),
-        FORWARD(30-13),
-        TURN(-90),
-        BACKWARD(122),
-        FORWARD(120+13),
-        TURN(-90),
-        FORWARD(20)
+        MILLIEU_ACTIONNEUR(),
+        BACKWARD(5,DEFAULT_SPEED/2),
+        FORWARD(122.5-13),
+        TURN(isYellow?90:-90),
+        FORWARD(15,DEFAULT_SPEED/2),
+        BACKWARD(10)
     };
     step_state init_sub_state = step_state::IDLE;
     while (1)
@@ -538,32 +573,29 @@ void initialisation_table()
         }
         else if (init_sub_state == step_state::IDLE)
         {
-            if (etapeencour + 1 == init_table.size())
+            if (etape_inittable + 1 == init_table.size())
             {
-                etapeencour++;
+                etape_inittable++;
                 return;
             }
-            if (etapeencour + 1 > init_table.size())
+            if (etape_inittable + 1 > init_table.size())
             {
                 return;
             }
-            etapeencour++;
-            actioncall(init_table[etapeencour]);
+            etape_inittable++;
+            actioncall(init_table[etape_inittable]);
             init_sub_state = step_state::RUNNING;
-            debugPrint("running three ! at step");
-            debugPrintln(etapeencour);
-            delay(100);
         }
         else
         {
             init_sub_state = step_state::IDLE;
-            debugPrintln("running four !");
-            delay(200);
         }
     }
 }
 
 bool debugmode = false;
+
+// pour redémarrer le code depuis bouton ou autre : ESP.restart() ou abort()
 
 /// @brief fonction d'initialisation
 void setup()
@@ -571,20 +603,29 @@ void setup()
     Serial.begin(9600);
     pcacard.begin();
     pcacard.setPWMFreq(60);
-     if (!pcf.begin(0x20, &Wire)) {
-    Serial.println("Couldn't find PCF8574");
-    while (1);
-  }
+    pinMode(D8, OUTPUT);
+    digitalWrite(D8, LOW);
+    delay(2000);
+    if (!pcf.begin(0x20, &Wire)) {
+        Serial.println("Couldn't find PCF8574");
+        while (1){debugPrintln("Failled to find PCF");delay(1000);};
+    }
     // pcf.begin();
     pcf.pinMode(0, INPUT);
     pcf.pinMode(1, INPUT);
     pcf.pinMode(2, INPUT);
     pcf.pinMode(3, INPUT);
     pcf.pinMode(4, OUTPUT);
-    pinMode(D8, OUTPUT);
-    digitalWrite(D8, LOW);
-    delay(1000);
     pinMode(Pin::IHM::TIRETTE, INPUT_PULLUP);
+    delay(2000);
+    if(!pamimode){
+        // callibrage bordure
+        debugPrintln("ready to check");
+        while(pcf.digitalRead(0));//{debugPrintln("checking");delay(1000);};
+        delay(2000);
+        initialisation_table();
+        delay(1000);
+    }
     while (!digitalRead(Pin::IHM::TIRETTE))
     {
         debugPrintln("what the fuck?");
@@ -594,7 +635,7 @@ void setup()
     while (digitalRead(Pin::IHM::TIRETTE))
     {
         // debugPrintln("Mais t'es pas là mais t'es où?");
-        delay(100);
+        // delay(100);
     }
     if (!pcf.digitalRead(1) && !pcf.digitalRead(2) && !pcf.digitalRead(3))
     {
@@ -604,7 +645,6 @@ void setup()
     choixStrategie();
     millieu_actionneur();
     ouvrir_aimants();
-    initialisation_table();
     // delay(3000);
     // monter_banderole();
     etat_a = etat::INITALISATION;
@@ -615,6 +655,8 @@ bool showed_step = false;
 bool isPaused = false;
 long lastPamiDetectCheck = 0;
 bool lastPamiDetectValue = false;
+long matchStartTime=0;
+bool matchStarted=false;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -630,73 +672,44 @@ void loop()
         }
         if (not(digitalRead(Pin::IHM::TIRETTE)))
         {
-
-            debugPrintln("Jchuis là");
-            // debugPrintln(hc.dist());
-            // delay(100);
+            //debugPrintln("tirette présente");
         }
         else
         {
             etat_a = etat::MATCH;
-            debugPrintln("fin setup");
+            // debugPrintln("fin setup");
+            matchStarted=true;
+            matchStartTime=millis();
             initialisation_et_banderole();
+            if(pamimode){
+                delay(86000);
+                pcacard.setPWM(0,0,angleToPulse(45));
+            }
             initLidar();
-            delay(5000);
-            // delay(100);
         }
-        delay(100);
+        // delay(500);
         return;
     }
-    // if (getLidarStatus())
-    // {
-    //     debugPrint("paused by lidar at ");
-    //     // delay(200);
-    //     if (!isPaused)
-    //     {
-    //         robot.stop();
-    //         isPaused = true;
-    //     }
-    //     robot.run(getLidarStatus());
-    //     return;
-    // }
-    // else
-    // {
-    //     if (isPaused)
-    //     {
-    //         robot.resume();
-    //         isPaused = false;
-    //     }
-    // }
+    if(matchStarted && millis()-matchStartTime>=100000) return;
     if (etat_action == step_state::RUNNING and actionfini())
     {
         etat_action = step_state::IDLE;
-        debugPrintln("end");
-        // debugPrintln("running one !");
     }
     else if (etat_action == step_state::RUNNING)
     {
-        if (!showed_step)
-        {
-            debugPrintln("hello");
-            delay(100);
-            showed_step = true;
-        }
         bool *isStopped;
         isStopped = getLidarStatus();
         robot.run(isStopped);
-        // robot.debugPosition();
-        // debugPrintln("running two !");
-        // delay(100);
     }
     else if (etat_action == step_state::IDLE)
     {
         if (etapeencour + 1 == strat.size())
         { // etapesuivante =etapeencours + 1; par rapport à size() = etapesuivante -1; donc = etapeencour+1-1
-            debugPrintln("hello fucking world ?");
-            debugPrintln(etapeencour);
-            debugPrintln(strat.size());
-            debugPrintln("ok");
-            delay(250);
+            // debugPrintln("hello fucking world ?");
+            // debugPrintln(etapeencour);
+            // debugPrintln(strat.size());
+            // debugPrintln("ok");
+            // delay(250);
             etapeencour++;
             return;
         }
@@ -704,19 +717,19 @@ void loop()
         {
             return;
         }
-        showed_step = false;
+        // showed_step = false;
         etapeencour++;
         actioncall(strat[etapeencour]);
         etat_action = step_state::RUNNING;
-        debugPrint("running three ! at step");
-        debugPrintln(etapeencour);
-        delay(100);
+        // debugPrint("running three ! at step");
+        // debugPrintln(etapeencour);
+        // delay(100);
     }
     else
     {
         etat_action = step_state::IDLE;
-        debugPrintln("running four !");
-        delay(200);
+        // debugPrintln("running four !");
+        // delay(200);
     }
 }
 
@@ -779,3 +792,4 @@ void debugMode()
     }
     // delay(250);
 }
+
