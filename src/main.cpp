@@ -778,9 +778,9 @@ void setup()
     delay(2000);
     if (!pamimode)
     {
-        delay(2000);
-        descendre_actionneur();
-        while(1);
+        // delay(2000);
+        // // descendre_actionneur();
+        // while(1);
         // callibrage bordure
         debugPrintln("ready to check");
         while (pcf.digitalRead(0))
