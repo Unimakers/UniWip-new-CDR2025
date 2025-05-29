@@ -436,7 +436,8 @@ void choixStrategie()
 }
 
 // DEBUT DU CODE PUR ET DUR
-
+long matchStartTime = 0;
+bool matchStarted = false;
 Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
 #define SERVOMIN 125
 #define SERVOMAX 575
@@ -478,7 +479,7 @@ void ouvrir_aimants()
 }
 void actionneur_pos(double angle){
     if(pamimode)return;
-    if(angle<30) return;
+    if(angle<33) return;
     // WARNING ANGLE MIN ACTIONNEUR
     //attention minimum à 30 sinon risque de casse
     pcacard.setPWM(0,0,angleToPulse(angle));
@@ -778,6 +779,9 @@ void setup()
     delay(2000);
     if (!pamimode)
     {
+        delay(2000);
+        descendre_actionneur();
+        while(1);
         // callibrage bordure
         debugPrintln("ready to check");
         while (pcf.digitalRead(0))
@@ -815,8 +819,7 @@ bool showed_step = false;
 bool isPaused = false;
 long lastPamiDetectCheck = 0;
 bool lastPamiDetectValue = false;
-long matchStartTime = 0;
-bool matchStarted = false;
+
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
