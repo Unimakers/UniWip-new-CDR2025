@@ -150,14 +150,13 @@ strategie noforfait = strategie{
     FORWARD(40),
     BACKWARD(40)};
 strategie stratapointblue = strategie{
-    FORWARD(60 - 13),
-    TURN(45),
+    FORWARD(55 - 13),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
+    TURN(45),
     FORWARD(sqrt(2) * 10),
     TURN(-45),
-    WAIT(500),
-    FORWARD(15),
+    FORWARD(20),
     MILLIEU_ACTIONNEUR(),
     BACKWARD(25),
     TURN(-135),
@@ -178,32 +177,32 @@ strategie stratapointblue = strategie{
     // WAIT(1000),
     BACKWARD(70),
     MILLIEU_ACTIONNEUR(),
-    TURN(-135),
+    TURN(-125),
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(-45),
-    // ICI ON ATTENDRA LES PAMIS
+    //action
     FORWARD(15),
 
 };
 strategie stratapointyellow = strategie{
-    FORWARD(60 - 13),
-    TURN(-45),
+    FORWARD(55 - 13),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
+    TURN(-45),
     FORWARD(sqrt(2) * 10),
     TURN(45),
-    WAIT(500),
-    FORWARD(15),
+    FORWARD(25),
     MILLIEU_ACTIONNEUR(),
-    BACKWARD(25),
-    TURN(135),
+    WAIT(200),
+    BACKWARD(30),
+    TURN(135,4000),
     FORWARD(sqrt(2) * 10),
     TURN(45),
     FORWARD(30),
     DESCENDRE_ACTIONNEUR(),
     WAIT(500),
     FERMER_AIMANTS(),
-    WAIT(500),
+    WAIT(400),
     BACKWARD(30),
     // OUVRIR_AIMANTS(),
     TURN(90),
@@ -214,10 +213,10 @@ strategie stratapointyellow = strategie{
     // WAIT(1000),
     BACKWARD(70),
     MILLIEU_ACTIONNEUR(),
-    TURN(135),
+    TURN(125),
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(45),
-    // ICI ON ATTENDRA LES PAMIS
+    //action
     FORWARD(15),
 };
 
