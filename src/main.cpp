@@ -503,7 +503,7 @@ void descendre_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(17 + actionneur_ascenseur_offset));
+    pcacard.setPWM(0, 0, angleToPulse(13 + actionneur_ascenseur_offset));
 }
 void millieu_actionneur()
 {
