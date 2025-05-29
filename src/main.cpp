@@ -227,11 +227,11 @@ strategie stratadoublepointblue = strategie{
     WAIT(500),
     FORWARD(25),
     MILLIEU_ACTIONNEUR(),
-    BACKWARD(25),
-    TURN(-135),
-    FORWARD(sqrt(2) * 10),
-    TURN(-45),
-    FORWARD(30),
+    BACKWARD(25,4000),
+    TURN(-135,4000),
+    FORWARD(sqrt(2) * 10,4000),
+    TURN(-45,4000),
+    FORWARD(30,4000),
     DESCENDRE_ACTIONNEUR(),
     WAIT(1500),
     FERMER_AIMANTS(),
@@ -368,6 +368,13 @@ strategie pompestrat = {
 strategie strat = stratdemoservo;
 void choixStrategie()
 {
+    // strat = strategie{MILLIEU_ACTIONNEUR(),
+    // BACKWARD(25,4000),
+    // TURN(-135,4000),
+    // FORWARD(sqrt(2) * 10,4000),
+    // TURN(-45,4000),
+    // FORWARD(30,4000),};
+    // return;
     if (pamimode)
     {
         bool isSuperStar = true;
@@ -540,23 +547,23 @@ void actioncall(etape step)
         break;
 
     case atype::BACKWARD:
-        sendCurrentAngle({0, -1});
+        // sendCurrentAngle({0, -1});
         return robot.backward(step.distance, step.vitesse);
         break;
 
     case atype::TURN:
-        if (step.angle > 0)
-        {
-            sendCurrentAngle({0.5, 0.5});
-        }
-        else if (step.angle < 0)
-        {
-            sendCurrentAngle({-0.5, 0.5});
-        }
-        else
-        {
-            sendCurrentAngle({0, 1});
-        }
+        // if (step.angle > 0)
+        // {
+        //     sendCurrentAngle({0.5, 0.5});
+        // }
+        // else if (step.angle < 0)
+        // {
+        //     sendCurrentAngle({-0.5, 0.5});
+        // }
+        // else
+        // {
+        //     sendCurrentAngle({0, 1});
+        // }
         return robot.turn(step.angle, step.vitesse);
 
     case atype::TURNTO:
@@ -834,6 +841,8 @@ void loop()
     else if (etat_action == step_state::RUNNING)
     {
         bool *isStopped;
+        // bool temppause = false;
+        // isStopped=&temppause;
         isStopped = getLidarStatus();
         robot.run(isStopped);
     }
@@ -855,6 +864,8 @@ void loop()
         }
         // showed_step = false;
         etapeencour++;
+        debugPrint("calling action backward with speed");
+        debugPrint(strat[etapeencour].vitesse);
         actioncall(strat[etapeencour]);
         etat_action = step_state::RUNNING;
         // debugPrint("running three ! at step");

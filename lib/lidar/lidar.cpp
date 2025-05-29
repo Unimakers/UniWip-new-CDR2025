@@ -79,8 +79,8 @@ int sumPoints = 0;
 // FONCTION COEUR 0 (COUEUR LIDAR)
 void get_point_lidar()
 {
-    if(lidarHasObstacle && (millis()-cooldownstarted)<3000){
-
+    if(lidarHasObstacle && (millis()-cooldownstarted)<3000){// && sumPoints>=15){
+        lidarHasObstacle=true;
     }else{
         lidarHasObstacle=false;
         sumPoints=0;
@@ -101,20 +101,20 @@ void get_point_lidar()
             {
                 if (obstacle(mesure.distance))
                 {
-                    debugPrintln(((std::string)("d"+std::to_string(mesure.distance)+" "+std::to_string(mesure.angle))).c_str());
+                    // debugPrintln(((std::string)("d"+std::to_string(mesure.distance)+" "+std::to_string(mesure.angle))).c_str());
                     // double xPoint = cos(mesure.angle) * mesure.distance;
                     // double yPoint = sin(mesure.angle) * mesure.distance;
                     // debugPrintln(((std::string) ">point:" + std::to_string(xPoint) + ":" + std::to_string(yPoint) + "|xy").c_str());
                     // debugPrintln(((std::string) "angle:" + std::to_string(mesure.angle)).c_str());
                     // supobstacleval=true;
-                    if(millis()-cooldownstarted<1000){
-                        sumPoints++;
-                        if(sumPoints>=15){
+                    // if(millis()-cooldownstarted<1000){
+                    //     sumPoints++;
+                    //     if(sumPoints>=15){
                             lidarHasObstacle=true;
-                        }
-                    }else{
-                        sumPoints=1;
-                    }
+                    //     }
+                    // }else{
+                    //     sumPoints=1;
+                    // }
                     cooldownstarted=millis();
                 }
                 else{
