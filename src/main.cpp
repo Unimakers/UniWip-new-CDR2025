@@ -58,7 +58,8 @@ enum struct atype
     DESACTIVER_POMPE,
     WAIT,
     MONTER_BANDEROLE,
-    MONTER_CANETTE_2E_ETAGE
+    MONTER_CANETTE_2E_ETAGE,
+    WAIT_END
 };
 typedef atype A;
 struct etape
@@ -95,6 +96,7 @@ etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
 etape MONTER_BANDEROLE() { return etape{.action = A::MONTER_BANDEROLE}; }
 etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
 etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action=A::MONTER_CANETTE_2E_ETAGE};}
+etape WAIT_END(){return etape{.action=A::WAIT_END};}
 typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
@@ -531,6 +533,9 @@ int angleToPulse(int angle)
     int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
     return pulse;
 }
+void wait_end(){
+    while(matchStarted && millis() - matchStartTime <= 94000);
+}
 
 void debugMode();
 
@@ -607,6 +612,9 @@ void actioncall(etape step)
         break;
     case atype::MONTER_CANETTE_2E_ETAGE:
         return monter_canette_2e_etage();
+        break;
+    case atype::WAIT_END:
+        return wait_end();
         break;
     default:
         break;
