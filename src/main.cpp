@@ -59,7 +59,8 @@ enum struct atype
     WAIT,
     MONTER_BANDEROLE,
     MONTER_CANETTE_2E_ETAGE,
-    WAIT_END
+    WAIT_END,
+    ACTIONNEUR_POS
 };
 typedef atype A;
 struct etape
@@ -95,6 +96,7 @@ etape ACTIVER_POMPE() { return etape{.action = A::ACTIVER_POMPE}; }
 etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
 etape MONTER_BANDEROLE() { return etape{.action = A::MONTER_BANDEROLE}; }
 etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
+etape ACTIONNEUR_POS(double angle) { return etape{.action = A::ACTIONNEUR_POS, .angle=angle}; }
 etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action=A::MONTER_CANETTE_2E_ETAGE};}
 etape WAIT_END(){return etape{.action=A::WAIT_END};}
 typedef std::vector<etape> strategie;
@@ -474,6 +476,13 @@ void ouvrir_aimants()
     pcacard.setPWM(13, 0, angleToPulse(45));
     pcacard.setPWM(14, 0, angleToPulse(45));
 }
+void actionneur_pos(double angle){
+    if(pamimode)return;
+    if(angle<30) return;
+    // WARNING ANGLE MIN ACTIONNEUR
+    //attention minimum à 30 sinon risque de casse
+    pcacard.setPWM(0,0,angleToPulse(angle));
+}
 void monter_banderole()
 {
     if (pamimode)
@@ -616,6 +625,8 @@ void actioncall(etape step)
     case atype::WAIT_END:
         return wait_end();
         break;
+    case atype::ACTIONNEUR_POS:
+        return actionneur_pos(step.angle);
     default:
         break;
     }
