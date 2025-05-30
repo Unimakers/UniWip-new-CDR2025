@@ -235,7 +235,7 @@ strategie stratapointyellow = strategie{
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(30),
     //action
-    FORWARD(15),
+    FORWARD(5),
 };
 
 strategie stratadoublepointblue = strategie{
@@ -271,7 +271,7 @@ strategie stratadoublepointblue = strategie{
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(45),
     //action
-    FORWARD(15),
+    FORWARD(5),
 };
 strategie stratadoublepointyellow = strategie{
     FORWARD(60 - 13),
@@ -816,6 +816,9 @@ void setup()
     {
         // enter debug mode
         debugmode = true;
+    }
+    if(!pcf.digitalRead(3)){
+        activer_lidar=false;
     }
     choixStrategie();
     millieu_actionneur();
