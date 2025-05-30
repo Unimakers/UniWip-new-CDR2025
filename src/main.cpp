@@ -85,7 +85,7 @@ constexpr int
     ;
 etape FORWARD(double d, int v = DEFAULT_SPEED) { return etape{.action = A::FORWARD, .distance = d, .vitesse = v}; }
 etape BACKWARD(double d, int v = DEFAULT_SPEED) { return etape{.action = A::BACKWARD, .distance = d, .vitesse = v}; }
-etape TURN(double a, int v = DEFAULT_SPEED / 2) { return etape{.action = A::TURN, .angle = a, .vitesse = v}; }
+etape TURN(double a, int v = DEFAULT_SPEED/2) { return etape{.action = A::TURN, .angle = a, .vitesse = v}; }
 etape TURNTO(double a, int v = DEFAULT_SPEED) { return etape{.action = A::TURNTO, .angle = a, .vitesse = v}; }
 etape MOVETO(RobotMove::Coord c, int v = DEFAULT_SPEED) { return etape{.action = A::MOVETO, .coordonnees = c, .vitesse = v}; }
 etape FERMER_AIMANTS() { return etape{.action = A::FERMER_AIMANTS}; }
@@ -102,13 +102,11 @@ etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
 etape ACTIONNEUR_POS(double angle) { return etape{.action = A::ACTIONNEUR_POS, .angle = angle}; }
 etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action = A::MONTER_CANETTE_2E_ETAGE}; }
 etape WAIT_END() { return etape{.action = A::WAIT_END}; }
-etape MILIEU_BRAS() { return etape{.action = A::MILIEU_BRAS}; }
-etape ACTIVER_LIDAR() { return etape{.action = A::MILIEU_BRAS}; }
-etape DESACTIVER_LIDAR() { return etape{.action = A::MILIEU_BRAS}; }
+etape MILIEU_BRAS(){return etape{.action=A::MILIEU_BRAS};}
 typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
-int PAMI_WAIT = 86000;
+int PAMI_WAIT = 6000;
 
 // DÉFINITION DE LA STRATÉGIE
 
@@ -159,6 +157,63 @@ strategie noforfait = strategie{
 
 // coord depart=1800/200
 strategie stratapointblue = strategie{
+    DESCENDRE_ACTIONNEUR(),
+    OUVRIR_AIMANTS(),
+    FORWARD(30),
+    TURN(90),
+    FORWARD(42.5),
+    TURN(-90),
+    BACKWARD(15),
+    ACTIVER_POMPE(),
+    DESCENDRE_BRAS(),
+    WAIT(500),
+    MONTER_BRAS(),
+    FORWARD(15),
+    TURN(180,6000),
+    FORWARD(40,4000),
+    MONTER_CANNETTE_2E_ETAGE(),
+    WAIT(500),
+    FORWARD(10,1000),
+    BACKWARD(27.5),
+    TURN(180,2000),
+    BACKWARD(15),
+    DESCENDRE_BRAS(),
+    WAIT(500),
+    DESACTIVER_POMPE(),
+    WAIT(250),
+    FORWARD(15),
+    TURN(90,2000),
+    BACKWARD(62.5),
+    ACTIVER_POMPE(),
+    DESCENDRE_BRAS(),
+    WAIT(500),
+    MONTER_BRAS(),
+    FORWARD(10),
+    TURN(180,2000),
+    FORWARD(20),
+    MONTER_ACTIONNEUR(),
+    WAIT(500),
+    FERMER_AIMANTS(),
+    WAIT(500),
+    BACKWARD(15),
+    DESCENDRE_ACTIONNEUR(),
+    OUVRIR_AIMANTS(),
+    WAIT(2000),
+    FORWARD(20),
+    MONTER_ACTIONNEUR(),
+    WAIT(2000),
+    BACKWARD(77.5),
+    TURN(90,1000),
+    FORWARD(12.5),
+    MONTER_CANNETTE_2E_ETAGE(),
+    WAIT(1000),
+    FORWARD(13,500),
+    millieu_actionneur(),
+    WAIT(400),
+    FERMER_AIMANTS(),
+    WAIT(400),
+    BACKWARD(10,1000),
+
 
 };
 strategie stratapointyellow = strategie{
@@ -178,11 +233,11 @@ strategie stratadoublepointblue = strategie{
     WAIT(500),
     MONTER_BRAS(),
     FORWARD(15),
-    TURN(180, 6000),
-    FORWARD(40, 1000),
+    TURN(180,6000),
+    FORWARD(40,1000),
     MONTER_CANNETTE_2E_ETAGE(),
     BACKWARD(25),
-    TURN(180, 6000),
+    TURN(180,6000),
     BACKWARD(18),
     DESCENDRE_BRAS(),
     WAIT(500),
@@ -190,8 +245,8 @@ strategie stratadoublepointblue = strategie{
     WAIT(200),
     FORWARD(10.5),
     MONTER_BRAS(),
-    TURN(-45, 6000),
-    FORWARD(sqrt(2) * 35),
+    TURN(-45,6000),
+    FORWARD(sqrt(2)*35),
     TURN(-132),
     BACKWARD(12),
     ACTIVER_POMPE(),
@@ -200,39 +255,39 @@ strategie stratadoublepointblue = strategie{
     MONTER_BRAS(),
     FORWARD(20),
     TURN(180),
-    FORWARD(23, 1000),
+    FORWARD(23,1000),
     TURN(5),
     MONTER_ACTIONNEUR(),
     WAIT(800),
     FERMER_AIMANTS(),
     WAIT(400),
-    BACKWARD(10, 1000),
+    BACKWARD(10,1000),
     DESCENDRE_ACTIONNEUR(),
     WAIT(200),
     OUVRIR_AIMANTS(),
     WAIT(2000),
-    FORWARD(18, 1000),
+    FORWARD(18,1000),
     MONTER_ACTIONNEUR(),
     WAIT(3000),
-    BACKWARD(45), // a reverifier
-    TURN(90, 1000),
+    BACKWARD(45),//a reverifier 
+    TURN(90,1000),
     FORWARD(32.5),
-    TURN(90, 1000),
+    TURN(90,1000),
     FORWARD(18),
     MONTER_CANNETTE_2E_ETAGE(),
-    FORWARD(10, 500),
+    FORWARD(10,500),
     MONTER_ACTIONNEUR(),
     WAIT(400),
     FERMER_AIMANTS(),
     WAIT(400),
     BACKWARD(40),
     TURN(20),
-    BACKWARD(sqrt(pow(37.5, 2) + pow(100, 2))),
+    BACKWARD(sqrt(pow(37.5,2)+pow(100,2))),
     TURN(-20),
     DESCENDRE_BRAS(),
 };
 strategie stratadoublepointyellow = strategie{
-
+    
 };
 strategie noforfait2 = strategie{
     OUVRIR_AIMANTS(),
@@ -363,7 +418,6 @@ void choixStrategie()
 // DEBUT DU CODE PUR ET DUR
 long matchStartTime = 0;
 bool matchStarted = false;
-bool activer_lidar = true;
 Adafruit_PWMServoDriver pcacard = Adafruit_PWMServoDriver();
 #define SERVOMIN 125
 #define SERVOMAX 575
@@ -447,21 +501,21 @@ void monter_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (0 - 4)));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 -(0-4)));
     pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(0));
 }
 void milieu_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (22 - 4)));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (22-4)));
     pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(22));
 }
 void descendre_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (40 - 4)));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (40-4)));
     pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(40));
 }
 void activer_pompe()
@@ -472,14 +526,6 @@ void activer_pompe()
     pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE, 4096, 0);
     pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT, 0, 4096);
     pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE, 4096, 0);
-}
-void active_lidar()
-{
-    activer_lidar = true;
-}
-void desactiver_lidar()
-{
-    activer_lidar = false;
 }
 void desactiver_pompe()
 {
@@ -583,13 +629,6 @@ void actioncall(etape step)
         break;
     case atype::ACTIONNEUR_POS:
         return actionneur_pos(step.angle);
-        break;
-    case atype::ACTIVER_LIDAR:
-        return active_lidar();
-        break;
-    case atype::DESACTIVER_LIDAR:
-        return desactiver_lidar();
-        break;
     default:
         break;
     }
@@ -717,6 +756,7 @@ bool debugmode = false;
 
 // pour redémarrer le code depuis bouton ou autre : ESP.restart() ou abort()
 
+bool activer_lidar = true;
 /// @brief fonction d'initialisation
 void setup()
 {
