@@ -38,8 +38,8 @@ namespace Pin
         namespace Servo
         {
             constexpr int
-                LEFT_ARM = 8,
-                RIGHT_ARM = 9,
+                RIGHT_ARM = 10,
+                LEFT_ARM = 11,
                 ELEVATOR = 0,
                 LEFT_MAGNET = 13,
                 RIGHT_MAGNET = 14,
