@@ -33,6 +33,22 @@ namespace Pin
             LIDAR_TX = TX;
 
     } // namespace IHM
+    namespace Actuators
+    {
+        namespace Servo
+        {
+            constexpr int
+                LEFT_ARM = 11,
+                RIGHT_ARM = 12,
+                ELEVATOR = 0,
+                LEFT_MAGNET = 13,
+                RIGHT_MAGNET = 14,
+                PUMP_LEFT = 10,
+                PUMP_LEFT_VALVE = 9,
+                PUMP_RIGHT = 8,
+                PUMP_RIGHT_VALVE = 7;
+        }
+    } // namespace Actuators
 
 } // namespace Pin
 namespace Math
@@ -59,11 +75,11 @@ namespace Physique
         ECRT_ROUE = 26,
 #endif
         DIAM_ROUE = 7.5,
-        #if PAMIMODE == 1
+#if PAMIMODE == 1
         STEP_MULTI = 8,
-        #else
+#else
         STEP_MULTI = 16,
-        #endif
+#endif
         STEP_REV = 200 * STEP_MULTI,
         STEP_CM = (STEP_REV / (2 * Math::PI14 * (DIAM_ROUE / 2))),
         ACCELARATION = 10;

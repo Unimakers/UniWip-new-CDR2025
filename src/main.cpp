@@ -473,77 +473,84 @@ void fermer_aimants()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(13, 0, angleToPulse(10));
-    pcacard.setPWM(14, 0, angleToPulse(80));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_MAGNET, 0, angleToPulse(10));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_MAGNET, 0, angleToPulse(80));
 }
 void ouvrir_aimants()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(13, 0, angleToPulse(45));
-    pcacard.setPWM(14, 0, angleToPulse(45));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_MAGNET, 0, angleToPulse(45));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_MAGNET, 0, angleToPulse(45));
 }
 void actionneur_pos(double angle){
     if(pamimode)return;
     if(angle<33) return;
     // WARNING ANGLE MIN ACTIONNEUR
     //attention minimum à 30 sinon risque de casse
-    pcacard.setPWM(0,0,angleToPulse(angle));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR,0,angleToPulse(angle));
 }
 void monter_banderole()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(63 + actionneur_ascenseur_offset));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(63 + actionneur_ascenseur_offset));
 }
 void monter_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(53 + actionneur_ascenseur_offset));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(53 + actionneur_ascenseur_offset));
 }
 void monter_canette_2e_etage(){
     if(pamimode)return;
-    pcacard.setPWM(0,0,angleToPulse(64+actionneur_ascenseur_offset));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR,0,angleToPulse(64+actionneur_ascenseur_offset));
 }
 void descendre_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(13 + actionneur_ascenseur_offset));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(13 + actionneur_ascenseur_offset));
 }
 void millieu_actionneur()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(0, 0, angleToPulse(40 + actionneur_ascenseur_offset));
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(40 + actionneur_ascenseur_offset));
 }
 void ouvrir_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(11, 0, angleToPulse(90 - 0));
-    pcacard.setPWM(12, 0, angleToPulse(0));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(90 - 0));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(0));
 }
 void fermer_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(11, 0, angleToPulse(90 - 45));
-    pcacard.setPWM(12, 0, angleToPulse(45));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(90 - 45));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(45));
 }
 void activer_pompe()
 {
     if (pamimode)
         return;
-    pcf.digitalWrite(5, HIGH);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT,0,4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE,4096,0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT,0,4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE,4096,0);
 }
 void desactiver_pompe()
 {
     if (pamimode)
-        return;
-    pcf.digitalWrite(5, LOW);
+    return;
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT,4096,0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE,0,4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT,4096,0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE,0,4096);
 }
+
 int angleToPulse(int angle)
 {
     int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
@@ -853,7 +860,7 @@ void loop()
             if (pamimode)
             {
                 delay(PAMI_WAIT);
-                pcacard.setPWM(0, 0, angleToPulse(45));
+                pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(45));
             }
             initLidar();
         }
