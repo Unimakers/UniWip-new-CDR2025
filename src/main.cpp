@@ -104,7 +104,7 @@ etape MILIEU_BRAS(){return etape{.action=A::MILIEU_BRAS};}
 typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
-int PAMI_WAIT = 6000;
+int PAMI_WAIT = 86000;
 
 // DÉFINITION DE LA STRATÉGIE
 
