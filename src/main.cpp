@@ -104,6 +104,7 @@ Adafruit_PCF8574 pcf;
 
 int PAMI_WAIT = 6000;
 
+
 // DÉFINITION DE LA STRATÉGIE
 
 /// @brief La stratégie numéro un du robot
@@ -340,39 +341,40 @@ strategie noforfait2 = strategie{
 strategie pamisuperstarstratblue = strategie{
     // BACKWARD(2),
     FORWARD(120),
-    TURN(-90),
-    BACKWARD(5),
-    FORWARD(35),
+    TURN(90),
+    BACKWARD(10),
+    FORWARD(38),
     // TURN(45),
     // FORWARD(10,DEFAULT_SPEED/2)
 };
 strategie pamisuperstarstratyellow = strategie{
     // BACKWARD(2),
     FORWARD(120),
-    TURN(90),
-    BACKWARD(5),
-    FORWARD(35),
+    TURN(-90),
+    BACKWARD(10),
+    FORWARD(38),
     // TURN(-45),
     // FORWARD(10,DEFAULT_SPEED/2)
 };
-strategie pamihomologationstratblue = strategie{
-    FORWARD(20, DEFAULT_SPEED / 2),
-    TURN(45),
-    TURN(-90),
-    TURN(45),
-    FORWARD(20, DEFAULT_SPEED / 2),
-};
-strategie pamihomologationstratyellow = strategie{
-    FORWARD(20, DEFAULT_SPEED / 2),
+strategie pamistratyellow = strategie{
+    FORWARD(20,DEFAULT_SPEED*1.5),
     TURN(-45),
+    FORWARD(35,DEFAULT_SPEED*1.5),
+    TURN(45),
+    FORWARD(40,DEFAULT_SPEED*1.5),
+    WAIT(5000),
+    FORWARD(15,DEFAULT_SPEED*1.5),
     TURN(90),
-    TURN(-45),
-    FORWARD(20, DEFAULT_SPEED / 2),
 };
-strategie pompestrat = {
-    ACTIVER_POMPE(),
-    // WAIT(3000),
-    // DESACTIVER_POMPE()
+strategie pamistratblue = strategie{
+    FORWARD(20,DEFAULT_SPEED*1.5),
+    TURN(45),
+    FORWARD(35,DEFAULT_SPEED*1.5),
+    TURN(-45),
+    FORWARD(40,DEFAULT_SPEED*1.5),
+    WAIT(5000),
+    FORWARD(15,DEFAULT_SPEED*1.5),
+    TURN(-90),
 };
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
 strategie strat = stratdemoservo;
@@ -387,34 +389,28 @@ void choixStrategie()
     // return;
     if (pamimode)
     {
-        bool isSuperStar = true;
-        if (!pcf.digitalRead(1))
+        bool isSuperStar = false;
+        if (!pcf.digitalRead(0))
         { // YELLOW
-            if (isSuperStar)
-            {
-                strat = pamisuperstarstratyellow;
-            }
-            else
-            {
-                strat = pamihomologationstratyellow;
+            if(isSuperStar){
+            strat = pamisuperstarstratyellow;
+            }else{
+                strat=pamistratyellow;
             }
         }
         else
         {
             // BLUE
-            if (isSuperStar)
-            {
-                strat = pamisuperstarstratblue;
-            }
-            else
-            {
-                strat = pamihomologationstratblue;
+            if(isSuperStar){
+            strat = pamisuperstarstratblue;
+            }else{
+                strat=pamistratblue;
             }
         }
     }
     else
     {
-        if (pcf.digitalRead(1))
+        if (pcf.digitalRead(0))
         { // YELLOW
             if (pcf.digitalRead(2))
             {
@@ -832,7 +828,7 @@ bool showed_step = false;
 bool isPaused = false;
 long lastPamiDetectCheck = 0;
 bool lastPamiDetectValue = false;
-
+double angle=0;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -840,10 +836,16 @@ void loop()
     //     debugMode();
     //     return;
     // }
+    etat_a=etat::FIN;
     if (etat_a != etat::MATCH)
     {
         if (etat_a == etat::FIN)
         {
+            angle+=.1;
+            pcacard.setPWM(0,0,45+(cos(angle)*45));
+            pcacard.setPWM(15,0,45+(cos(angle)*45));
+            debugPrintln(45+(cos(angle)*45));
+            delay(1000);
             return;
         }
         if (not(digitalRead(Pin::IHM::TIRETTE)))
@@ -893,6 +895,7 @@ void loop()
             // delay(250);
             etat_a=etat::FIN;
             etapeencour++;
+            etat_a=etat::FIN;
             return;
         }
         if (etapeencour + 1 > strat.size())
