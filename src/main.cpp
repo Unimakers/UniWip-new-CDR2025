@@ -779,25 +779,25 @@ void setup()
     pcacard.setPWMFreq(60);
     pinMode(D8, OUTPUT);
     digitalWrite(D8, LOW);
-    if(true){//TEST
-    delay(2000);
-    desactiver_pompe();
-    delay(200);
-    debugPrintln("monter_bras");
-    monter_bras();
-    delay(3000);
-    debugPrintln("milieu_bras");
-    milieu_bras();
-    activer_pompe();
-    delay(3000);
-    debugPrintln("descendre_bras");
-    descendre_bras();
-    delay(3000);
-    milieu_bras();
-    delay(5000);
-    descendre_bras();
-    desactiver_pompe();
-    }
+    // if(false){//TEST
+    // delay(2000);
+    // desactiver_pompe();
+    // delay(200);
+    // debugPrintln("monter_bras");
+    // monter_bras();
+    // delay(3000);
+    // debugPrintln("milieu_bras");
+    // milieu_bras();
+    // activer_pompe();
+    // delay(3000);
+    // debugPrintln("descendre_bras");
+    // descendre_bras();
+    // delay(3000);
+    // milieu_bras();
+    // delay(5000);
+    // descendre_bras();
+    // desactiver_pompe();
+    // }
     if (!pcf.begin(0x20, &Wire))
     {
         Serial.println("Couldn't find PCF8574");
