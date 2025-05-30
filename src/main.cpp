@@ -60,7 +60,8 @@ enum struct atype
     MONTER_BANDEROLE,
     MONTER_CANETTE_2E_ETAGE,
     WAIT_END,
-    ACTIONNEUR_POS
+    ACTIONNEUR_POS,
+    MILIEU_BRAS
 };
 typedef atype A;
 struct etape
@@ -99,6 +100,7 @@ etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
 etape ACTIONNEUR_POS(double angle) { return etape{.action = A::ACTIONNEUR_POS, .angle=angle}; }
 etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action=A::MONTER_CANETTE_2E_ETAGE};}
 etape WAIT_END(){return etape{.action=A::WAIT_END};}
+etape MILIEU_BRAS(){return etape{.action=A::MILIEU_BRAS};}
 typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
@@ -517,15 +519,22 @@ void monter_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(90 - 0));
-    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(0));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 -(0-4)));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(0));
+}
+void milieu_bras()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (22-4)));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(22));
 }
 void descendre_bras()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(90 - 45));
-    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(45));
+    pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(90 - (40-4)));
+    pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(40));
 }
 void activer_pompe()
 {
@@ -770,7 +779,25 @@ void setup()
     pcacard.setPWMFreq(60);
     pinMode(D8, OUTPUT);
     digitalWrite(D8, LOW);
+    if(true){//TEST
     delay(2000);
+    desactiver_pompe();
+    delay(200);
+    debugPrintln("monter_bras");
+    monter_bras();
+    delay(3000);
+    debugPrintln("milieu_bras");
+    milieu_bras();
+    activer_pompe();
+    delay(3000);
+    debugPrintln("descendre_bras");
+    descendre_bras();
+    delay(3000);
+    milieu_bras();
+    delay(5000);
+    descendre_bras();
+    desactiver_pompe();
+    }
     if (!pcf.begin(0x20, &Wire))
     {
         Serial.println("Couldn't find PCF8574");
