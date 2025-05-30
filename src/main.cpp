@@ -867,8 +867,10 @@ void loop()
         // delay(500);
         return;
     }
-    if (matchStarted && millis() - matchStartTime >= 100000)
+    if (matchStarted && millis() - matchStartTime >= 100000){
+        etat_a=etat::FIN;
         return;
+    }
     if (etat_action == step_state::RUNNING and actionfini())
     {
         etat_action = step_state::IDLE;
@@ -890,11 +892,13 @@ void loop()
             // debugPrintln(strat.size());
             // debugPrintln("ok");
             // delay(250);
+            etat_a=etat::FIN;
             etapeencour++;
             return;
         }
         if (etapeencour + 1 > strat.size())
         {
+            etat_a=etat::FIN;
             return;
         }
         // showed_step = false;
