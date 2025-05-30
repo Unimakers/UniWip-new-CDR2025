@@ -680,7 +680,8 @@ void loop()
             angle+=.1;
             pcacard.setPWM(0,0,45+(cos(angle)*45));
             pcacard.setPWM(15,0,45+(cos(angle)*45));
-            delay(200);
+            debugPrintln(45+(cos(angle)*45));
+            delay(1000);
             return;
         }
         if (not(digitalRead(Pin::IHM::TIRETTE)))
