@@ -224,11 +224,11 @@ strategie stratadoublepointblue = strategie{
     WAIT(500),
     DESACTIVER_POMPE(),
     WAIT(200),
-    FORWARD(15),
+    FORWARD(7.5),
     TURN(-45,6000),
     FORWARD(sqrt(2)*32.5),
     TURN(-135,6000),
-    BACKWARD(10),
+    BACKWARD(12.5),
     ACTIVER_POMPE(),
     DESCENDRE_BRAS(),
     WAIT(500),
@@ -239,8 +239,26 @@ strategie stratadoublepointblue = strategie{
     MONTER_ACTIONNEUR(),
     WAIT(300),
     FERMER_AIMANTS(),
-
-
+    WAIT(100),
+    BACKWARD(5),
+    DESCENDRE_ACTIONNEUR(),
+    OUVRIR_AIMANTS(),
+    WAIT(1000),
+    FORWARD(10),
+    MONTER_CANNETTE_2E_ETAGE(),
+    BACKWARD(45),//a reverifier 
+    TURN(-90,6000),
+    FORWARD(32.5),
+    TURN(90,6000),
+    FORWARD(40),
+    MONTER_ACTIONNEUR(),
+    WAIT(500),
+    FERMER_AIMANTS(),
+    BACKWARD(40),
+    TURN(20),
+    FORWARD(sqrt(pow(37.5,2)+pow(100,2))),
+    TURN(-20),
+    DESCENDRE_BRAS(),
 };
 strategie stratadoublepointyellow = strategie{
     // copier strat bleu
