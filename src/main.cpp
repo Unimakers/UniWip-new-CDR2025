@@ -664,6 +664,7 @@ long lastPamiDetectCheck = 0;
 bool lastPamiDetectValue = false;
 long matchStartTime=0;
 bool matchStarted=false;
+double angle;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -671,10 +672,15 @@ void loop()
     //     debugMode();
     //     return;
     // }
+    etat_a=etat::FIN;
     if (etat_a != etat::MATCH)
     {
         if (etat_a == etat::FIN)
         {
+            angle+=.1;
+            pcacard.setPWM(0,0,45+(cos(angle)*45));
+            pcacard.setPWM(15,0,45+(cos(angle)*45));
+            delay(200);
             return;
         }
         if (not(digitalRead(Pin::IHM::TIRETTE)))
@@ -697,7 +703,10 @@ void loop()
         // delay(500);
         return;
     }
-    if(matchStarted && millis()-matchStartTime>=100000) return;
+    if(matchStarted && millis()-matchStartTime>=100000){
+        etat_a=etat::FIN;
+        return;
+    };
     if (etat_action == step_state::RUNNING and actionfini())
     {
         etat_action = step_state::IDLE;
@@ -718,10 +727,12 @@ void loop()
             // debugPrintln("ok");
             // delay(250);
             etapeencour++;
+            etat_a=etat::FIN;
             return;
         }
         if (etapeencour + 1 > strat.size())
         {
+            etat_a=etat::FIN;
             return;
         }
         // showed_step = false;
