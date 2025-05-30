@@ -4,7 +4,7 @@
 #define debugPrintln Serial.println
 #define infoPrintln // Serial.println
 #define infoPrint   // Serial.print
-#define PAMIMODE 0  // 0=ROBOT 1=PAMI
+#define PAMIMODE 1  // 0=ROBOT 1=PAMI
 
 #if PAMIMODE == 1
 constexpr bool pamimode = true;

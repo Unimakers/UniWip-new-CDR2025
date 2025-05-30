@@ -19,6 +19,7 @@ void RobotMove::setCoord(RobotMove::Coord startcoord)
 }
 void RobotMove::run(bool *lidar)
 {
+    if(*lidar && pamimode) return;
     if (*lidar)
     {
         debugPrintln(((std::string) "detected at" + std::to_string(millis())).c_str());

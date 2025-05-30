@@ -97,6 +97,7 @@ typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
 
+
 // DÉFINITION DE LA STRATÉGIE
 
 /// @brief La stratégie numéro un du robot
@@ -237,34 +238,40 @@ strategie noforfait2 = strategie{
 strategie pamisuperstarstratblue = strategie{
     // BACKWARD(2),
     FORWARD(120),
-    TURN(-90),
-    BACKWARD(5),
-    FORWARD(35),
+    TURN(90),
+    BACKWARD(10),
+    FORWARD(38),
     // TURN(45),
     // FORWARD(10,DEFAULT_SPEED/2)
 };
 strategie pamisuperstarstratyellow = strategie{
     // BACKWARD(2),
     FORWARD(120),
-    TURN(90),
-    BACKWARD(5),
-    FORWARD(35),
+    TURN(-90),
+    BACKWARD(10),
+    FORWARD(38),
     // TURN(-45),
     // FORWARD(10,DEFAULT_SPEED/2)
 };
-strategie pamihomologationstratblue = strategie{
-    FORWARD(20,DEFAULT_SPEED/2),
-    TURN(45),
-    TURN(-90),
-    TURN(45),
-    FORWARD(20,DEFAULT_SPEED/2),
-};
-strategie pamihomologationstratyellow = strategie{
-    FORWARD(20,DEFAULT_SPEED/2),
+strategie pamistratyellow = strategie{
+    FORWARD(20,DEFAULT_SPEED*1.5),
     TURN(-45),
+    FORWARD(35,DEFAULT_SPEED*1.5),
+    TURN(45),
+    FORWARD(40,DEFAULT_SPEED*1.5),
+    WAIT(5000),
+    FORWARD(15,DEFAULT_SPEED*1.5),
     TURN(90),
+};
+strategie pamistratblue = strategie{
+    FORWARD(20,DEFAULT_SPEED*1.5),
+    TURN(45),
+    FORWARD(35,DEFAULT_SPEED*1.5),
     TURN(-45),
-    FORWARD(20,DEFAULT_SPEED/2),
+    FORWARD(40,DEFAULT_SPEED*1.5),
+    WAIT(5000),
+    FORWARD(15,DEFAULT_SPEED*1.5),
+    TURN(-90),
 };
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
 strategie strat = stratdemoservo;
@@ -272,13 +279,13 @@ void choixStrategie()
 {
     if (pamimode)
     {
-        bool isSuperStar = true;
-        if (!pcf.digitalRead(1))
+        bool isSuperStar = false;
+        if (!pcf.digitalRead(0))
         { // YELLOW
             if(isSuperStar){
             strat = pamisuperstarstratyellow;
             }else{
-                strat=pamihomologationstratyellow;
+                strat=pamistratyellow;
             }
         }
         else
@@ -287,13 +294,13 @@ void choixStrategie()
             if(isSuperStar){
             strat = pamisuperstarstratblue;
             }else{
-                strat=pamihomologationstratblue;
+                strat=pamistratblue;
             }
         }
     }
     else
     {
-        if (pcf.digitalRead(1))
+        if (pcf.digitalRead(0))
         { // YELLOW
             strat = stratapointblue;
         }
@@ -682,7 +689,7 @@ void loop()
             matchStartTime=millis();
             initialisation_et_banderole();
             if(pamimode){
-                delay(86000);
+                delay(5000);
                 pcacard.setPWM(0,0,angleToPulse(45));
             }
             initLidar();
