@@ -4,7 +4,7 @@
 #define debugPrintln Serial.println
 #define infoPrintln // Serial.println
 #define infoPrint   // Serial.print
-#define PAMIMODE 1  // 0=ROBOT 1=PAMI
+#define PAMIMODE 0  // 0=ROBOT 1=PAMI
 
 #if PAMIMODE == 1
 constexpr bool pamimode = true;
@@ -38,14 +38,14 @@ namespace Pin
         namespace Servo
         {
             constexpr int
-                LEFT_ARM = 11,
-                RIGHT_ARM = 12,
+                LEFT_ARM = 8,
+                RIGHT_ARM = 9,
                 ELEVATOR = 0,
                 LEFT_MAGNET = 13,
                 RIGHT_MAGNET = 14,
-                PUMP_LEFT = 10,
-                PUMP_LEFT_VALVE = 9,
-                PUMP_RIGHT = 8,
+                PUMP_LEFT = 4,
+                PUMP_LEFT_VALVE = 5,
+                PUMP_RIGHT = 6,
                 PUMP_RIGHT_VALVE = 7;
         }
     } // namespace Actuators

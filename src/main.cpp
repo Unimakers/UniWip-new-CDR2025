@@ -717,7 +717,10 @@ void initialisation_table()
         FORWARD(122.5 - 13),
         TURN(isYellow ? 90 : -90),
         FORWARD(15, DEFAULT_SPEED / 2),
-        BACKWARD(10)};
+        BACKWARD(10),
+        // FERMER_BRAS(),
+        // ACTIVER_POMPE()
+};
     step_state init_sub_state = step_state::IDLE;
     while (1)
     {
@@ -836,11 +839,11 @@ void loop()
     //     debugMode();
     //     return;
     // }
-    etat_a=etat::FIN;
     if (etat_a != etat::MATCH)
     {
         if (etat_a == etat::FIN)
         {
+            if(!pamimode)return;
             angle+=.1;
             pcacard.setPWM(0,0,45+(cos(angle)*45));
             pcacard.setPWM(15,0,45+(cos(angle)*45));
