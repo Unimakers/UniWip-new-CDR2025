@@ -761,6 +761,7 @@ bool debugmode = false;
 
 // pour redémarrer le code depuis bouton ou autre : ESP.restart() ou abort()
 
+bool activer_lidar=true;
 /// @brief fonction d'initialisation
 void setup()
 {
@@ -882,7 +883,13 @@ void loop()
         bool *isStopped;
         // bool temppause = false;
         // isStopped=&temppause;
-        isStopped = getLidarStatus();
+        if(activer_lidar){
+            isStopped = getLidarStatus();
+        }
+        else{
+            bool hello = false;
+            isStopped=&hello;
+        }
         robot.run(isStopped);
     }
     else if (etat_action == step_state::IDLE)
