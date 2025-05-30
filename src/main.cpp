@@ -96,14 +96,13 @@ etape ACTIVER_POMPE() { return etape{.action = A::ACTIVER_POMPE}; }
 etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
 etape MONTER_BANDEROLE() { return etape{.action = A::MONTER_BANDEROLE}; }
 etape WAIT(int time) { return etape{.action = A::WAIT, .time = time}; }
-etape ACTIONNEUR_POS(double angle) { return etape{.action = A::ACTIONNEUR_POS, .angle=angle}; }
-etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action=A::MONTER_CANETTE_2E_ETAGE};}
-etape WAIT_END(){return etape{.action=A::WAIT_END};}
+etape ACTIONNEUR_POS(double angle) { return etape{.action = A::ACTIONNEUR_POS, .angle = angle}; }
+etape MONTER_CANNETTE_2E_ETAGE() { return etape{.action = A::MONTER_CANETTE_2E_ETAGE}; }
+etape WAIT_END() { return etape{.action = A::WAIT_END}; }
 typedef std::vector<etape> strategie;
 Adafruit_PCF8574 pcf;
 
 int PAMI_WAIT = 6000;
-
 
 // DÉFINITION DE LA STRATÉGIE
 
@@ -151,6 +150,8 @@ strategie noforfait = strategie{
     FORWARD(40),
     BACKWARD(40),
 };
+
+// coord depart=1800/200
 strategie stratapointblue = strategie{
     FORWARD(45 - 13),
     DESCENDRE_ACTIONNEUR(),
@@ -180,9 +181,10 @@ strategie stratapointblue = strategie{
     BACKWARD(30),
     OUVRIR_AIMANTS(),
     TURN(-90),
-    FORWARD(62.5),
+    FORWARD(65),
+    WAIT(400),
     MONTER_CANNETTE_2E_ETAGE(),
-    BACKWARD(62.5),
+    BACKWARD(65),
     TURN(90),
     FORWARD(30),
     MONTER_ACTIONNEUR(),
@@ -190,131 +192,56 @@ strategie stratapointblue = strategie{
     TURN(150),
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(-30),
-    //action
-    FORWARD(15),
+    // action
+    FORWARD(5),
 };
 strategie stratapointyellow = strategie{
-    FORWARD(45 - 13),
-    DESCENDRE_ACTIONNEUR(),
-    OUVRIR_AIMANTS(),
-    TURN(-45),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
-    FORWARD(20),
-    MILLIEU_ACTIONNEUR(),
-    BACKWARD(25),
-    TURN(135),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
-    FORWARD(30),
-    DESCENDRE_ACTIONNEUR(),
-    WAIT(1200),
-    FERMER_AIMANTS(),
-    WAIT(700),
-    BACKWARD(30),
-    // OUVRIR_AIMANTS(),
-    TURN(90),
-    FORWARD(42.5),
-    TURN(-90),
-    FORWARD(35),
-    // FERMER_AIMANTS(),
-    // WAIT(1000),
-    BACKWARD(30),
-    OUVRIR_AIMANTS(),
-    TURN(90),
-    FORWARD(62.5),
-    MONTER_CANNETTE_2E_ETAGE(),
-    BACKWARD(62.5),
-    TURN(-90),
-    FORWARD(30),
-    MONTER_ACTIONNEUR(),
-    WAIT(200),
-    FERMER_AIMANTS(),
-    BACKWARD(70),
-    TURN(150),
-    FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
-    TURN(30),
-    //action
-    FORWARD(5),
+    // copier strat bleu
 };
-
+// coord depart=1800/200
 strategie stratadoublepointblue = strategie{
-    
-    FORWARD(55 - 13),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
-    TURN(-45),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
-    FORWARD(20),
-    MILLIEU_ACTIONNEUR(),
-    BACKWARD(25),
-    TURN(-35),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
     FORWARD(30),
-    DESCENDRE_ACTIONNEUR(),
-    WAIT(1000),
-    FERMER_AIMANTS(),
-    WAIT(700),
-    BACKWARD(30),
-    // OUVRIR_AIMANTS(),
     TURN(90),
     FORWARD(42.5),
     TURN(-90),
-    FORWARD(35),
-    // FERMER_AIMANTS(),
-    // WAIT(1000),
-    BACKWARD(65),
-    MILLIEU_ACTIONNEUR(),
-    TURN(135),
-    FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
-    TURN(45),
-    //action
-    FORWARD(5),
+    BACKWARD(15),
+    ACTIVER_POMPE(),
+    FERMER_BRAS(),
+    WAIT(500),
+    OUVRIR_BRAS(),
+    FORWARD(15),
+    TURN(180,6000),
+    FORWARD(40),
+    MONTER_CANNETTE_2E_ETAGE(),
+    BACKWARD(25),
+    TURN(180,6000),
+    BACKWARD(15),
+    FERMER_BRAS(),
+    WAIT(500),
+    DESACTIVER_POMPE(),
+    WAIT(200),
+    FORWARD(15),
+    TURN(-45,6000),
+    FORWARD(sqrt(2)*32.5),
+    TURN(-135,6000),
+    BACKWARD(10),
+    ACTIVER_POMPE(),
+    FERMER_BRAS(),
+    WAIT(500),
+    OUVRIR_BRAS(),
+    FORWARD(10),
+    TURN(180,6000),
+    FORWARD(20),
+    MONTER_ACTIONNEUR(),
+    WAIT(300),
+    fermer_aimants(),
+
+
 };
 strategie stratadoublepointyellow = strategie{
-    FORWARD(60 - 13),
-    TURN(-45),
-    DESCENDRE_ACTIONNEUR(),
-    OUVRIR_AIMANTS(),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
-    WAIT(500),
-    FORWARD(15),
-    MILLIEU_ACTIONNEUR(),
-    BACKWARD(25),
-    TURN(135),
-    FORWARD(sqrt(2) * 10),
-    TURN(45),
-    FORWARD(30),
-    DESCENDRE_ACTIONNEUR(),
-    WAIT(500),
-    FERMER_AIMANTS(),
-    WAIT(500),
-    BACKWARD(30),
-    OUVRIR_AIMANTS(),
-    TURN(90),
-    FORWARD(42.5),
-    TURN(-90),
-    FORWARD(25),
-    BACKWARD(25),
-    TURN(90),
-    FORWARD(42.5),
-    TURN(-90),
-    MONTER_CANNETTE_2E_ETAGE(),
-    FORWARD(30),
-    FERMER_AIMANTS(),
-    // WAIT(1000),
-    BACKWARD(60),
-    TURN(90),
-    FORWARD(42.5),
-    MILLIEU_ACTIONNEUR(),
-    TURN(45),
-    FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
-    TURN(45),
-    // ICI ON ATTENDRA LES PAMIS
-    FORWARD(15),
+    // copier strat bleu
 };
 strategie noforfait2 = strategie{
     OUVRIR_AIMANTS(),
@@ -356,23 +283,23 @@ strategie pamisuperstarstratyellow = strategie{
     // FORWARD(10,DEFAULT_SPEED/2)
 };
 strategie pamistratyellow = strategie{
-    FORWARD(20,DEFAULT_SPEED*1.5),
+    FORWARD(20, DEFAULT_SPEED * 1.5),
     TURN(-45),
-    FORWARD(35,DEFAULT_SPEED*1.5),
+    FORWARD(35, DEFAULT_SPEED * 1.5),
     TURN(45),
-    FORWARD(40,DEFAULT_SPEED*1.5),
+    FORWARD(40, DEFAULT_SPEED * 1.5),
     WAIT(5000),
-    FORWARD(15,DEFAULT_SPEED*1.5),
+    FORWARD(15, DEFAULT_SPEED * 1.5),
     TURN(90),
 };
 strategie pamistratblue = strategie{
-    FORWARD(20,DEFAULT_SPEED*1.5),
+    FORWARD(20, DEFAULT_SPEED * 1.5),
     TURN(45),
-    FORWARD(35,DEFAULT_SPEED*1.5),
+    FORWARD(35, DEFAULT_SPEED * 1.5),
     TURN(-45),
-    FORWARD(40,DEFAULT_SPEED*1.5),
+    FORWARD(40, DEFAULT_SPEED * 1.5),
     WAIT(5000),
-    FORWARD(15,DEFAULT_SPEED*1.5),
+    FORWARD(15, DEFAULT_SPEED * 1.5),
     TURN(-90),
 };
 /// @brief la stratégie finale du robot (peut être définie sur n'importe quelle stratégie)
@@ -391,19 +318,25 @@ void choixStrategie()
         bool isSuperStar = false;
         if (!pcf.digitalRead(0))
         { // YELLOW
-            if(isSuperStar){
-            strat = pamisuperstarstratyellow;
-            }else{
-                strat=pamistratyellow;
+            if (isSuperStar)
+            {
+                strat = pamisuperstarstratyellow;
+            }
+            else
+            {
+                strat = pamistratyellow;
             }
         }
         else
         {
             // BLUE
-            if(isSuperStar){
-            strat = pamisuperstarstratblue;
-            }else{
-                strat=pamistratblue;
+            if (isSuperStar)
+            {
+                strat = pamisuperstarstratblue;
+            }
+            else
+            {
+                strat = pamistratblue;
             }
         }
     }
@@ -478,12 +411,15 @@ void ouvrir_aimants()
     pcacard.setPWM(Pin::Actuators::Servo::LEFT_MAGNET, 0, angleToPulse(45));
     pcacard.setPWM(Pin::Actuators::Servo::RIGHT_MAGNET, 0, angleToPulse(45));
 }
-void actionneur_pos(double angle){
-    if(pamimode)return;
-    if(angle<33) return;
+void actionneur_pos(double angle)
+{
+    if (pamimode)
+        return;
+    if (angle < 33)
+        return;
     // WARNING ANGLE MIN ACTIONNEUR
-    //attention minimum à 30 sinon risque de casse
-    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR,0,angleToPulse(angle));
+    // attention minimum à 30 sinon risque de casse
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(angle));
 }
 void monter_banderole()
 {
@@ -497,9 +433,11 @@ void monter_actionneur()
         return;
     pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(53 + actionneur_ascenseur_offset));
 }
-void monter_canette_2e_etage(){
-    if(pamimode)return;
-    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR,0,angleToPulse(64+actionneur_ascenseur_offset));
+void monter_canette_2e_etage()
+{
+    if (pamimode)
+        return;
+    pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(64 + actionneur_ascenseur_offset));
 }
 void descendre_actionneur()
 {
@@ -531,19 +469,19 @@ void activer_pompe()
 {
     if (pamimode)
         return;
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT,0,4096);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE,4096,0);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT,0,4096);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE,4096,0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT, 0, 4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE, 4096, 0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT, 0, 4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE, 4096, 0);
 }
 void desactiver_pompe()
 {
     if (pamimode)
-    return;
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT,4096,0);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE,0,4096);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT,4096,0);
-    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE,0,4096);
+        return;
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT, 4096, 0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_LEFT_VALVE, 0, 4096);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT, 4096, 0);
+    pcacard.setPWM(Pin::Actuators::Servo::PUMP_RIGHT_VALVE, 0, 4096);
 }
 
 int angleToPulse(int angle)
@@ -551,8 +489,10 @@ int angleToPulse(int angle)
     int pulse = map(angle, 0, 90, SERVOMIN, SERVOMAX);
     return pulse;
 }
-void wait_end(){
-    while(matchStarted && millis() - matchStartTime <= 94000);
+void wait_end()
+{
+    while (matchStarted && millis() - matchStartTime <= 94000)
+        ;
 }
 
 void debugMode();
@@ -718,7 +658,7 @@ void initialisation_table()
         BACKWARD(10),
         // FERMER_BRAS(),
         // ACTIVER_POMPE()
-};
+    };
     step_state init_sub_state = step_state::IDLE;
     while (1)
     {
@@ -761,7 +701,7 @@ bool debugmode = false;
 
 // pour redémarrer le code depuis bouton ou autre : ESP.restart() ou abort()
 
-bool activer_lidar=true;
+bool activer_lidar = true;
 /// @brief fonction d'initialisation
 void setup()
 {
@@ -817,8 +757,9 @@ void setup()
         // enter debug mode
         debugmode = true;
     }
-    if(!pcf.digitalRead(3)){
-        activer_lidar=false;
+    if (!pcf.digitalRead(3))
+    {
+        activer_lidar = false;
     }
     choixStrategie();
     millieu_actionneur();
@@ -833,7 +774,7 @@ bool showed_step = false;
 bool isPaused = false;
 long lastPamiDetectCheck = 0;
 bool lastPamiDetectValue = false;
-double angle=0;
+double angle = 0;
 /// @brief fonction appelée à chaque loop du controlleur
 void loop()
 {
@@ -845,11 +786,12 @@ void loop()
     {
         if (etat_a == etat::FIN)
         {
-            if(!pamimode)return;
-            angle+=.1;
-            pcacard.setPWM(0,0,45+(cos(angle)*45));
-            pcacard.setPWM(15,0,45+(cos(angle)*45));
-            debugPrintln(45+(cos(angle)*45));
+            if (!pamimode)
+                return;
+            angle += .1;
+            pcacard.setPWM(0, 0, 45 + (cos(angle) * 45));
+            pcacard.setPWM(15, 0, 45 + (cos(angle) * 45));
+            debugPrintln(45 + (cos(angle) * 45));
             delay(1000);
             return;
         }
@@ -873,8 +815,9 @@ void loop()
         // delay(500);
         return;
     }
-    if (matchStarted && millis() - matchStartTime >= 100000){
-        etat_a=etat::FIN;
+    if (matchStarted && millis() - matchStartTime >= 100000)
+    {
+        etat_a = etat::FIN;
         return;
     }
     if (etat_action == step_state::RUNNING and actionfini())
@@ -886,12 +829,14 @@ void loop()
         bool *isStopped;
         // bool temppause = false;
         // isStopped=&temppause;
-        if(activer_lidar){
+        if (activer_lidar)
+        {
             isStopped = getLidarStatus();
         }
-        else{
+        else
+        {
             bool hello = false;
-            isStopped=&hello;
+            isStopped = &hello;
         }
         robot.run(isStopped);
     }
@@ -904,14 +849,14 @@ void loop()
             // debugPrintln(strat.size());
             // debugPrintln("ok");
             // delay(250);
-            etat_a=etat::FIN;
+            etat_a = etat::FIN;
             etapeencour++;
-            etat_a=etat::FIN;
+            etat_a = etat::FIN;
             return;
         }
         if (etapeencour + 1 > strat.size())
         {
-            etat_a=etat::FIN;
+            etat_a = etat::FIN;
             return;
         }
         // showed_step = false;
