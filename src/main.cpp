@@ -152,7 +152,7 @@ strategie noforfait = strategie{
     BACKWARD(40),
 };
 strategie stratapointblue = strategie{
-    FORWARD(55 - 13),
+    FORWARD(45 - 13),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
     TURN(45),
@@ -166,7 +166,7 @@ strategie stratapointblue = strategie{
     TURN(-45),
     FORWARD(30),
     DESCENDRE_ACTIONNEUR(),
-    WAIT(1500),
+    WAIT(1200),
     FERMER_AIMANTS(),
     WAIT(700),
     BACKWARD(30),
@@ -177,27 +177,24 @@ strategie stratapointblue = strategie{
     FORWARD(35),
     // FERMER_AIMANTS(),
     // WAIT(1000),
-    BACKWARD(20),
+    BACKWARD(30),
     OUVRIR_AIMANTS(),
     TURN(-90),
     FORWARD(62.5),
     MONTER_CANNETTE_2E_ETAGE(),
     BACKWARD(62.5),
     TURN(90),
-    FORWARD(20),
-    MILLIEU_ACTIONNEUR(),
-    WAIT(200),
-    FERMER_AIMANTS(),
-
+    FORWARD(30),
+    MONTER_ACTIONNEUR(),
     BACKWARD(70),
-    TURN(-150),
+    TURN(150),
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
     TURN(-30),
     //action
     FORWARD(15),
 };
 strategie stratapointyellow = strategie{
-    FORWARD(55 - 13),
+    FORWARD(45 - 13),
     DESCENDRE_ACTIONNEUR(),
     OUVRIR_AIMANTS(),
     TURN(-45),
@@ -222,15 +219,17 @@ strategie stratapointyellow = strategie{
     FORWARD(35),
     // FERMER_AIMANTS(),
     // WAIT(1000),
-    BACKWARD(45),
+    BACKWARD(30),
     OUVRIR_AIMANTS(),
     TURN(90),
     FORWARD(62.5),
     MONTER_CANNETTE_2E_ETAGE(),
     BACKWARD(62.5),
     TURN(-90),
-    FORWARD(45),
-    MILLIEU_ACTIONNEUR(),
+    FORWARD(30),
+    MONTER_ACTIONNEUR(),
+    WAIT(200),
+    FERMER_AIMANTS(),
     BACKWARD(70),
     TURN(150),
     FORWARD(sqrt(pow(70, 2) + pow(47.5, 2))),
@@ -410,7 +409,7 @@ void choixStrategie()
     }
     else
     {
-        if (pcf.digitalRead(0))
+        if (pcf.digitalRead(1))
         { // YELLOW
             if (pcf.digitalRead(2))
             {
@@ -665,7 +664,6 @@ void initialisation_et_banderole()
         BACKWARD(20 - distance_recul_banderole),
         // FERMER_AIMANTS(),
         TURN(180),
-        BACKWARD(10),
     };
     step_state init_sub_state = step_state::IDLE;
     while (1)
