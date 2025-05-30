@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #define debugPrint // Serial.print
-#define debugPrintln Serial.println
+#define debugPrintln //Serial.println
 #define infoPrintln // Serial.println
 #define infoPrint   // Serial.print
 #define PAMIMODE 0  // 0=ROBOT 1=PAMI
