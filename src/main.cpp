@@ -52,8 +52,8 @@ enum struct atype
     MONTER_ACTIONNEUR,
     DESCENDRE_ACTIONNEUR,
     MILLIEU_ACTIONNEUR,
-    OUVRIR_BRAS,
-    FERMER_BRAS,
+    MONTER_BRAS,
+    DESCENDRE_BRAS,
     ACTIVER_POMPE,
     DESACTIVER_POMPE,
     WAIT,
@@ -90,8 +90,8 @@ etape OUVRIR_AIMANTS() { return etape{.action = A::OUVRIR_AIMANTS}; }
 etape MONTER_ACTIONNEUR() { return etape{.action = A::MONTER_ACTIONNEUR}; }
 etape DESCENDRE_ACTIONNEUR() { return etape{.action = A::DESCENDRE_ACTIONNEUR}; }
 etape MILLIEU_ACTIONNEUR() { return etape{.action = A::MILLIEU_ACTIONNEUR}; }
-etape OUVRIR_BRAS() { return etape{.action = A::OUVRIR_BRAS}; }
-etape FERMER_BRAS() { return etape{.action = A::FERMER_BRAS}; }
+etape MONTER_BRAS() { return etape{.action = A::MONTER_BRAS}; }
+etape DESCENDRE_BRAS() { return etape{.action = A::DESCENDRE_BRAS}; }
 etape ACTIVER_POMPE() { return etape{.action = A::ACTIVER_POMPE}; }
 etape DESACTIVER_POMPE() { return etape{.action = A::DESACTIVER_POMPE}; }
 etape MONTER_BANDEROLE() { return etape{.action = A::MONTER_BANDEROLE}; }
@@ -117,9 +117,9 @@ strategie stratdemoservo = strategie{
     // WAIT(2000),
     // FERMER_AIMANTS(),
     // WAIT(1000),
-    // OUVRIR_BRAS(),
+    // MONTER_BRAS(),
     // WAIT(2000),
-    // FERMER_BRAS(),
+    // DESCENDRE_BRAS(),
 };
 strategie stratun = strategie{
     OUVRIR_AIMANTS(),
@@ -513,14 +513,14 @@ void millieu_actionneur()
         return;
     pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(40 + actionneur_ascenseur_offset));
 }
-void ouvrir_bras()
+void monter_bras()
 {
     if (pamimode)
         return;
     pcacard.setPWM(Pin::Actuators::Servo::LEFT_ARM, 0, angleToPulse(90 - 0));
     pcacard.setPWM(Pin::Actuators::Servo::RIGHT_ARM, 0, angleToPulse(0));
 }
-void fermer_bras()
+void descendre_bras()
 {
     if (pamimode)
         return;
@@ -610,11 +610,11 @@ void actioncall(etape step)
     case atype::MILLIEU_ACTIONNEUR:
         return millieu_actionneur();
         break;
-    case atype::OUVRIR_BRAS:
-        return ouvrir_bras();
+    case atype::MONTER_BRAS:
+        return monter_bras();
         break;
-    case atype::FERMER_BRAS:
-        return fermer_bras();
+    case atype::DESCENDRE_BRAS:
+        return descendre_bras();
         break;
     case atype::ACTIVER_POMPE:
         return activer_pompe();
@@ -716,7 +716,7 @@ void initialisation_table()
         TURN(isYellow ? 90 : -90),
         FORWARD(15, DEFAULT_SPEED / 2),
         BACKWARD(10),
-        // FERMER_BRAS(),
+        // DESCENDRE_BRAS(),
         // ACTIVER_POMPE()
 };
     step_state init_sub_state = step_state::IDLE;
