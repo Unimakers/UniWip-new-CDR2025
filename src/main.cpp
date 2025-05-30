@@ -860,7 +860,6 @@ void loop()
             if (pamimode)
             {
                 delay(PAMI_WAIT);
-                pcacard.setPWM(Pin::Actuators::Servo::ELEVATOR, 0, angleToPulse(45));
             }
             initLidar();
         }
