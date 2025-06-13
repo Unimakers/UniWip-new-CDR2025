@@ -310,7 +310,7 @@ strategie stratadoublepointyellow = strategie{
     TURN(180,2000),
     FORWARD(24),
     MONTER_ACTIONNEUR(),
-    WAIT(500),*
+    WAIT(500),
     FERMER_AIMANTS(),
     WAIT(500),
     BACKWARD(24.5),
